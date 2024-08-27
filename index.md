@@ -4,21 +4,27 @@ layout: default
 
 Text can be **bold**, _italic_, or ~~strikethrough~~.
 
-[Link to another page](./another-page.html).
+
 
 There should be whitespace between paragraphs.
 
 There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.
 
-# Header 1
+# TryHackMe
 
-This is a normal paragraph following a header. GitHub is a code hosting platform for version control and collaboration. It lets you and others work together on projects from anywhere.
+These are the learning paths I have completed on [Link to another page](tryhackme.com).
 
-## Header 2
+*   SOC Level 1 - 14%
+*   This is an unordered list following a header.
+*   This is an unordered list following a header.
 
-> This is a blockquote following a header.
+## Education
+
+> Cyber Academy Accelerated Associate of Applied Science (AAS)
 >
-> When something is important enough, you do it even if the odds are not in your favor.
+> The Associate of Applied Science in Cybersecurity is offered at locations across the state of Indiana, but Ivy Tech Columbus also offers an accelerated way to earn your degree in partnership with Muscatatuck Urban Training Center, a national Department of Defense military base.
+
+Students in this nationally-recognized program live on the base during their training and take advantage of over 300 real-life training structures including the Cybertropolis simulation city.
 
 ### Header 3
 
