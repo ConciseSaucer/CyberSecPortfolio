@@ -2,21 +2,19 @@
 layout: default
 ---
 
-Text can be **bold**, _italic_, or ~~strikethrough~~.
+# Introduction
+Hello my name is Noah.
 
-
-
---There should be whitespace between paragraphs.--
-
-There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.
+This page is a collection of all my cyber security achievements.
 
 # TryHackMe
 
 These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 
+*   Introduction to Cyber Security - 0%
 *   SOC Level 1 - 14%
-*   This is an unordered list following a header.
-*   This is an unordered list following a header.
+*   Cyber Defense - 4%
+*   Pre Security - 0%
 
 # Education
 
@@ -31,6 +29,7 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 > The Cyber Academy is based at Muscatatuck Urban Training Center (MUTC), located between Cincinnati, Louisville and Indianapolis. MUTC serves as a U.S. Department of Defense training facility and is home to the > Cybertropolis, a Department of Defense urban cyber testing and training environment.
 >
 > Cyber Academy students are immersed in this training environment, experiencing the most advanced, state-of-the-art cybersecurity training available.
+
 #### Academy courses include:
 
 *   Cloud Computing
