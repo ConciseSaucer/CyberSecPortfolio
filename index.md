@@ -18,7 +18,7 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 *   This is an unordered list following a header.
 *   This is an unordered list following a header.
 
-## Education
+# Education
 
 **Cyber Academy Accelerated Associate of Applied Science (AAS)**
 >
@@ -26,6 +26,21 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 > Urban Training Center, a national Department of Defense military base.
 >
 > Students in this nationally-recognized program live on the base during their training and take advantage of over 300 real-life training structures including the Cybertropolis simulation city.
+
+### What is the Cyber Academy?
+> The Cyber Academy is based at Muscatatuck Urban Training Center (MUTC), located between Cincinnati, Louisville and Indianapolis. MUTC serves as a U.S. Department of Defense training facility and is home to the > Cybertropolis, a Department of Defense urban cyber testing and training environment.
+>
+> Cyber Academy students are immersed in this training environment, experiencing the most advanced, state-of-the-art cybersecurity training available.
+#### Academy courses include:
+
+*   Cloud Computing
+*   IT Support
+*   Networking
+*   Customer Support
+*   Linux
+*   Disaster Recovery and Business Continuity
+*   Ethical Hacking
+
 
 ### Header 3
 
