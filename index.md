@@ -47,7 +47,9 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 *   SOC Level 1 - 14%
 *   Cyber Defense - 4%
 *   Pre Security - 0%
-  
+
+# WORK IN PROGRESS
+
 ### Header 3
 
 ```js
