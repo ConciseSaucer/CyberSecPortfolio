@@ -7,14 +7,13 @@ Hello my name is Noah.
 
 This page is a collection of all my cyber security achievements.
 
-# TryHackMe
+# Certifications
 
-These are the learning paths I have completed on [TryHackMe](tryhackme.com).
+These are the certifications I have aquired or in the process of getting
 
-*   Introduction to Cyber Security - 0%
-*   SOC Level 1 - 14%
-*   Cyber Defense - 4%
-*   Pre Security - 0%
+*   CompTIA Network+ - In progress
+*   CompTIA Linux+ - In progress
+*   CompTIA Security+ - In progress
 
 # Education
 
@@ -40,7 +39,15 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 *   Disaster Recovery and Business Continuity
 *   Ethical Hacking
 
+# TryHackMe
 
+These are the learning paths I have completed on [TryHackMe](tryhackme.com).
+
+*   Introduction to Cyber Security - 0%
+*   SOC Level 1 - 14%
+*   Cyber Defense - 4%
+*   Pre Security - 0%
+  
 ### Header 3
 
 ```js
