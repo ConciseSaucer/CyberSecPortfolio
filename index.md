@@ -12,7 +12,7 @@ There should be whitespace between paragraphs. We recommend including a README, 
 
 # TryHackMe
 
-These are the learning paths I have completed on [Link to another page](tryhackme.com).
+These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 
 *   SOC Level 1 - 14%
 *   This is an unordered list following a header.
