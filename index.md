@@ -6,7 +6,7 @@ Text can be **bold**, _italic_, or ~~strikethrough~~.
 
 
 
-There should be whitespace between paragraphs.
+--There should be whitespace between paragraphs.--
 
 There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.
 
@@ -20,11 +20,12 @@ These are the learning paths I have completed on [Link to another page](tryhackm
 
 ## Education
 
-> Cyber Academy Accelerated Associate of Applied Science (AAS)
+**Cyber Academy Accelerated Associate of Applied Science (AAS)**
 >
-> The Associate of Applied Science in Cybersecurity is offered at locations across the state of Indiana, but Ivy Tech Columbus also offers an accelerated way to earn your degree in partnership with Muscatatuck Urban Training Center, a national Department of Defense military base.
-
-Students in this nationally-recognized program live on the base during their training and take advantage of over 300 real-life training structures including the Cybertropolis simulation city.
+> The Associate of Applied Science in Cybersecurity is offered at locations across the state of Indiana, but Ivy Tech Columbus also offers an accelerated way to earn your degree in partnership with Muscatatuck
+> Urban Training Center, a national Department of Defense military base.
+>
+> Students in this nationally-recognized program live on the base during their training and take advantage of over 300 real-life training structures including the Cybertropolis simulation city.
 
 ### Header 3
 
