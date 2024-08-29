@@ -59,11 +59,14 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 
 ### Header 3
 
-```js
-// Javascript code with syntax highlighting.
-var fun = function lang(l) {
-  dateformat.i18n = require('./lang/' + l)
-  return true;
+```py
+#// Python code with syntax highlighting.
+def Location(locate):
+    for x in locate:
+        print(x)
+
+Places = [input("Name Location 1 "),input("Name Location 2 "),input("Name Location 3 ")]
+Location(Places)
 }
 ```
 
