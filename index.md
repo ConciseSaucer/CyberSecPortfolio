@@ -24,7 +24,7 @@ These are the certifications I have aquired or in the process of getting
 
 # Confereneces, Clubs, and Events
 
-###Conferences
+## Conferences
 
 - Human Cybersecurity Awareness Event 10/8 
   - Career Journey Conversation 
@@ -41,7 +41,7 @@ These are the certifications I have aquired or in the process of getting
   - level 2 item
 - level 1 item
   
-###Clubs
+## Clubs
 *   Cyber Club
 *   WiCyS- Women in Cybersecurity
   
@@ -80,7 +80,7 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 
 # WORK IN PROGRESS
 
-### Code
+## Code
 
 ```py
 #// Python code with syntax highlighting.
