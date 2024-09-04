@@ -22,6 +22,29 @@ These are the certifications I have aquired or in the process of getting
 *   CompTIA Linux+ - In progress
 *   CompTIA Security+ - In progress
 
+# Confereneces, Clubs, and Events
+
+###Conferences
+
+- Human Cybersecurity Awareness Event 10/8 
+  - Career Journey Conversation 
+  - Kickoff & Keynote: Cybersecurity and AI in Healthcare 
+  - Human & Artificial Intelligence: Social Engineering Now & Next 
+  - In it Together: The FBI’s Effort to Wage Digital Justice Requires Strong Partnerships Within our Community 
+- National Cybersecurity Virtual Career Fair
+  - level 2 item
+  - level 2 item
+  - level 2 item
+     - level 3
+- level 1 item
+  - level 2 item
+  - level 2 item
+- level 1 item
+  
+###Clubs
+*   Cyber Club
+*   WiCyS- Women in Cybersecurity
+  
 # Education
 
 **Cyber Academy Accelerated Associate of Applied Science (AAS)**
@@ -32,7 +55,7 @@ These are the certifications I have aquired or in the process of getting
 > Students in this nationally-recognized program live on the base during their training and take advantage of over 300 real-life training structures including the Cybertropolis simulation city.
 
 ### What is the Cyber Academy?
-> The Cyber Academy is based at Muscatatuck Urban Training Center (MUTC), located between Cincinnati, Louisville and Indianapolis. MUTC serves as a U.S. Department of Defense training facility and is home to the > Cybertropolis, a Department of Defense urban cyber testing and training environment.
+> The Cyber Academy is based at Muscatatuck Urban Training Center (MUTC), located between Cincinnati, Louisville and Indianapolis. MUTC serves as a U.S. Department of Defense training facility and is home to the Cybertropolis, a Department of Defense urban cyber testing and training environment.
 >
 > Cyber Academy students are immersed in this training environment, experiencing the most advanced, state-of-the-art cybersecurity training available.
 
@@ -57,7 +80,7 @@ These are the learning paths I have completed on [TryHackMe](tryhackme.com).
 
 # WORK IN PROGRESS
 
-### Header 3
+### Code
 
 ```py
 #// Python code with syntax highlighting.
