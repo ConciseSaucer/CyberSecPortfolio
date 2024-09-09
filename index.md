@@ -43,7 +43,6 @@ These are the certifications I have aquired or in the process of getting
   
 ## Clubs
 *   Cyber Club
-*   WiCyS- Women in Cybersecurity
   
 # Education
 
