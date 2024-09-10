@@ -74,14 +74,45 @@ These are the learning paths I have completed on TryHackMe.com.
 ## Code
 
 ```py
-#// Python code with syntax highlighting.
-def Location(locate):
-    for x in locate:
-        print(x)
-
-Places = [input("Name Location 1 "),input("Name Location 2 "),input("Name Location 3 ")]
-Location(Places)
-}
+#//My Simple Guessing Game
+from random import randint as RNG
+def UserGuess(guess):
+        while True:
+          try:
+            x = int(input(f"Input a number between 1-100\n You have {guess} attempt(s) left\n"))
+            if x < 1 or x > 100:
+             print("Outside bounds")
+            else:
+             return x
+          except ValueError:
+            print("This is not a integer")
+def GuessGame():
+    guess = 5    
+    rng = RNG(1,100)
+    input_num = UserGuess(guess)
+    i = 0
+    while i < 5:
+        if input_num == rng:
+            print("You WIN, you have guessed correctly")
+            break
+        if guess == 1:
+            print("You LOSE, you have run out of guesses")
+            print(f"The correct answer was {rng}")
+            break
+        elif input_num > rng:
+            print("Lower\n")
+        elif input_num < rng:
+            print("Higher\n")
+        i += 0
+        guess -= 1
+        input_num = UserGuess(guess)
+    if guess == 1 or input_num == rng:
+       playagain = input("Play again? Type Y\n")
+       if playagain == "Y":
+          GuessGame()
+       else:
+          print("Thanks for playing!")
+GuessGame()
 ```
 
 ```ruby
