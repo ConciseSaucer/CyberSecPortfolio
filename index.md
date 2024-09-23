@@ -64,10 +64,11 @@ These are the certifications I have aquired or in the process of getting
 
 These are the learning paths I have completed on TryHackMe.com.
 
-*   Introduction to Cyber Security - 0%
+*   Introduction to Cyber Security - 100%
+*   Pre Security - 100%
 *   SOC Level 1 - 14%
 *   Cyber Defense - 4%
-*   Pre Security - 0%
+
 
 # WORK IN PROGRESS
 
