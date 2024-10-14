@@ -2,7 +2,7 @@
 layout: default
 ---
 
-# About Me
+# Hack Me
 <dl>
 <dt>Name</dt>
 <dd>Noah</dd>
@@ -52,12 +52,12 @@ These are the certifications I have aquired or in the process of getting
 
 #### Grades:
 
-*   SDEV120 Computing Logic - A 105% 
-*   ITSP132 IT Support Essentials 1 - A 98%
-*   INFM109 Informatics Fundamentals - A 98%
-*   IT Support Essentials II - IN PROGRESS
-*   Introduction to Networking - IN PROGRESS
-*   Linux and Virtualization Tech - IN PROGRESS
+*   A 105% - SDEV120 Computing Logic 
+*   A 98% - ITSP132 IT Support Essentials I
+*   A 98% - INFM109 Informatics Fundamentals
+*   IN PROGRESS - IT Support Essentials II
+*   IN PROGRESS - Introduction to Networking
+*   IN PROGRESS - Linux and Virtualization Tech
 *   Ethical Hacking
 
 # TryHackMe
