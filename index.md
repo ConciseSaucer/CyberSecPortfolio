@@ -73,52 +73,180 @@ These are the learning paths I have completed on TryHackMe.com.
 # WORK IN PROGRESS
 
 ## Code
+### IP sweeper
+```bash
+#!/bin/bash
 
-```py
-#//My Simple Guessing Game
-from random import randint as RNG
-def UserGuess(guess):
-        while True:
-          try:
-            x = int(input(f"Input a number between 1-100\n You have {guess} attempt(s) left\n"))
-            if x < 1 or x > 100:
-             print("Outside bounds")
-            else:
-             return x
-          except ValueError:
-            print("This is not a integer")
-def GuessGame():
-    guess = 5    
-    rng = RNG(1,100)
-    input_num = UserGuess(guess)
-    i = 0
-    while i < 5:
-        if input_num == rng:
-            print("You WIN, you have guessed correctly")
-            break
-        if guess == 1:
-            print("You LOSE, you have run out of guesses")
-            print(f"The correct answer was {rng}")
-            break
-        elif input_num > rng:
-            print("Lower\n")
-        elif input_num < rng:
-            print("Higher\n")
-        i += 0
-        guess -= 1
-        input_num = UserGuess(guess)
-    if guess == 1 or input_num == rng:
-       playagain = input("Play again? Type Y\n")
-       if playagain == "Y":
-          GuessGame()
-       else:
-          print("Thanks for playing!")
-GuessGame()
+if ["$1" == ""]
+then
+echo "You forgot an IP address"
+echo "Syntax ./ipsweep.sh 0.0.0"
+
+else
+for ip in `seq 1 254`; do
+ping -c 1 $1.$ip | grep "64 bytes" | cut -d " " -f 4 | tr -d ":" &
+done
+fi
 ```
-
-```ruby
-# Ruby code with syntax highlighting
-GitHubPages::Dependencies.gems.each do |gem, version|
-  s.add_dependency(gem, "= #{version}")
-end
+### Port Scanner
+```py
+import socket
+import sys
+from datetime import datetime
+target = ""
+if len(sys.argv) == 2:
+    target = socket.gethostbyname(sys.argv[1])
+else:
+    print("Invalid amount of arguments.")
+    print("Syntax: python3 scanner.py <ip>")
+if not target:
+    target = input("Enter the ip address")
+#Prints Header
+print("-"*50)
+print(f"Scanning target:{target}")
+print(f"Time started:{datetime.now()}")
+print("-"*50)
+try:
+    for port in range(1,150):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket.setdefaulttimeout(1)
+        result = s.connect_ex((target,port))
+        if result == 0:
+            print(f"Port {port} is open")
+        s.close()
+except KeyboardInterrupt:
+    print("\nExiting program")
+    sys.exit()
+except socket.gaierror:
+    print("Hostname could not be resolved")
+    sys.exit()
+except socket.error:
+    print("Could not connect to server.")
+    sys.exit()
+```
+### Password Cracker
+```py
+import threading
+from hashlib import md5
+from string import printable
+from itertools import product
+from getpass import getpass as gp
+from datetime import datetime
+import os
+THREADNUM = 6
+threads = []
+stop_event = threading.Event()# Event to signal all threads to stop
+def clear():#Clears the terminal
+    os.system("cls" if os.name == "nt" else "clear")
+def TestPasswd():#Creates a hash to test the program
+    while True:
+        pass1 = md5(gp("Enter your password: ").encode("UTF-8")).hexdigest()
+        pass2 = md5(gp("Confirm your password: ").encode("UTF-8")).hexdigest()
+        if pass1 == pass2:
+            with open("Hash.txt", "w") as shadow:
+                shadow.write(f"{pass1}\n")
+                break
+        else:
+            print("Your password didn't match!")
+def GetHash():#Gets a hash from the user
+    while True:
+        hash = input("Give me the md5 hash to crack\n")
+        if len(hash) == 32:#Checks for valid hash
+            with open("Hash.txt", "w") as shadow:
+                    shadow.write(f"{hash}\n")
+                    break
+        else:
+            print("Only md5 hashes are allowed")
+def Brutepwd(thread_id,r1,r2):# Brute forces the password hash to find a match
+    with open("Hash.txt", "r") as shadow_file:
+        for shadow in shadow_file:
+            for x in range(r1, r2):
+                res = product(printable[:-6], repeat=x)
+                for i in res:
+                    hashed = md5("".join(i).encode("UTF-8")).hexdigest()
+                    if progress == True:#Prints progress to terminal
+                        print(f"{hashed}    =>    {''.join(i)}")
+                    if stop_event.is_set():
+                        return  # Exit the thread if the event is set
+                    if hashed == shadow.strip():#Match found
+                        stop_event.set()  # Set the event to stop all other threads
+                        print(f"Gotcha! The password is {''.join(i)}")
+                        print(f"Complete at:{datetime.now()}")
+                        quit()
+            print(f"Thread {thread_id} has gone through all options at:{datetime.now()}.")
+def Dictattack():#Uses a password list to find a match
+    with open("Hash.txt", "r") as shadow_file:
+        with open("password_list.txt", "r") as password_file:
+            for shadow in shadow_file:
+                for password in password_file:
+                    hashed = md5(password.strip().encode("UTF-8")).hexdigest()
+                    if progress == True:
+                        print(f"{password}")
+                    if shadow.strip() == hashed:#Match
+                        print(f"Password Cracked! {hashed} => {password}")
+                        print(f"Complete at:{datetime.now()}")
+                        break
+def Pwdripper():#Creates threads for the brute force attack
+    for i in range(THREADNUM):
+        thread = threading.Thread(target=Brutepwd, args=(i+1,i+1,i+2,))
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
+    print("Hacked!")
+def DisplayTerminal():#Ask user if they want to see the progress
+    while True: 
+        print("-"*50)
+        print("Print attempts to the terminal?(Printing will increase the time it takes to crack)\n[y/N]")
+        print("-"*50)
+        displayinput = input("").lower()
+        if displayinput in ['y','n','']:break
+        else:
+            clear()
+    if displayinput in ['n','']:
+        progress = False
+    if displayinput == "y":
+        progress = True
+    return progress
+def Hash_or_test():
+    clear()
+    while True:
+        print("-"*50)
+        print("Do you have a hash? Or are you testing?\n[H] Have hash\n[T]Testing(Type a password)")
+        print("-"*50)
+        hash_test = input("").lower()
+        if hash_test in ["h","t"]:
+            break
+        else:
+            clear()
+    if hash_test == "h":
+        clear()
+        GetHash()
+    if hash_test == "t":
+        clear()
+        TestPasswd()
+def AttackType():
+    while True:
+        print("-"*50)
+        print("Enter the type of attack\n[B] Brute Force\n[D] Dictionary")
+        print("-"*50)
+        attack = input("").lower()
+        if attack in ["b","d"]:
+            break
+        else:
+            clear()
+    if attack == "b":
+        clear()
+        #Header
+        print("-"*50); print(f"Brute Force attack starting"); print(f"Time started:{datetime.now()}"); print("-"*50)
+        Pwdripper()
+    if attack == "d":
+        clear()
+        #Header
+        print("-"*50); print(f"Dictionary attack starting"); print(f"Time started:{datetime.now()}"); print("-"*50)
+        Dictattack()
+clear()
+progress = DisplayTerminal()
+Hash_or_test()
+AttackType()
 ```
