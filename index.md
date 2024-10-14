@@ -50,14 +50,14 @@ These are the certifications I have aquired or in the process of getting
 >
 > Cyber Academy students are immersed in this training environment, experiencing the most advanced, state-of-the-art cybersecurity training available.
 
-#### Academy courses include:
+#### Grades:
 
-*   Cloud Computing
-*   IT Support
-*   Networking
-*   Customer Support
-*   Linux
-*   Disaster Recovery and Business Continuity
+*   SDEV120 Computing Logic - A 105% 
+*   ITSP132 IT Support Essentials 1 - A 98%
+*   INFM109 Informatics Fundamentals - A 98%
+*   IT Support Essentials II - IN PROGRESS
+*   Introduction to Networking - IN PROGRESS
+*   Linux and Virtualization Tech - IN PROGRESS
 *   Ethical Hacking
 
 # TryHackMe
