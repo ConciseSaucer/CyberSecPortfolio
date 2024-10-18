@@ -22,7 +22,7 @@ These are the certifications I have aquired or in the process of getting
 *   CompTIA Linux+ - In progress
 *   CompTIA Security+ - In progress
 
-# Confereneces, Clubs, and Events
+# Confereneces, Presentations, etc
 
 ## Conferences
 
@@ -36,6 +36,14 @@ These are the certifications I have aquired or in the process of getting
 ## Clubs
 *   Cyber Club
   
+## Presentations
+- Brownstown Central High School 
+  - 10/4/24 
+  - Presented to classroom of high school students 
+  - Talked about the cyber academy and answered questions
+- MUTC
+  - 10/31/24
+  - Presenation on cyber awareness
 # Education
 
 **Cyber Academy Accelerated Associate of Applied Science (AAS)**
