@@ -44,6 +44,7 @@ These are the certifications I have aquired or in the process of getting
 - MUTC
   - 10/31/24
   - Presenation on cyber awareness
+    
 # Education
 
 **Cyber Academy Accelerated Associate of Applied Science (AAS)**
