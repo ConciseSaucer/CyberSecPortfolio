@@ -115,7 +115,7 @@ fi
 
 xsltproc $scan.xml -o $scan.html
 
-rm $file1 $file2 @scan.xml
+rm $file1 $file2 $scan.xml
 setsid firefox $scan.html &
 ```
 ### Port Scanner
