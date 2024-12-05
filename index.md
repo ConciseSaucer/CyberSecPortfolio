@@ -83,19 +83,40 @@ These are the learning paths I have completed on TryHackMe.com.
 
 ## Code
 ### IP sweeper
+Requires rofi, nmap, and xsltproc
 ```bash
 #!/bin/bash
 
-if ["$1" == ""]
-then
-echo "You forgot an IP address"
-echo "Syntax ./ipsweep.sh 0.0.0"
+interface=$(ip -c=never -br -4 addr | rofi -dmenu - p "which interface do you want to use?" | cut -d " " -f 1)
+myip=$(ip -c=never -br -4 addr show $interface | awk '{print $3}' | cut -d "/" -f 1)
+netid=$(ip -c=never -br 4 addr show $interface | awk '{print $3}' | cut -d "." -f 1-3)
+file1=$(mktemp)
+echo "Starting scan....."
 
-else
-for ip in `seq 1 254`; do
-ping -c 1 $1.$ip | grep "64 bytes" | cut -d " " -f 4 | tr -d ":" &
+for ip in $(seq 1 254); do
+ping -c 1 -W 2 $netid.$ip | grep "bytes from" | cut -d " " -f 4 | cut -d ":" -f 1 >> $file1 &
 done
+
+sleep 3
+file2=$(mktemp)
+grep -v $myip $file1 | sort -V >> $file2
+
+scan=$(cat $file2 | rofi -dmenu -p "What IP do you want to scan?")
+scan_type=$(echo -e "1. Quick Scan\n2. Stealth Scan\n3. Full Scan" | rofi -dmenu -p "What type of scan do you want to use?" | cut -d '.' -f 1)
+echo "Starting the scan of $scan"
+
+if [[ $scan_type == "1" ]]; then
+  nmap $scan -oX $scan.xml
+elif [[ $scan_type == "2" ]]; then
+  nmap -Pn -sS $scan -oX $scan.xml
+elif [[ $scan_type == "3" ]]; then
+  nmap -T4 -A -O -sC $scan -oX $scan.xml
 fi
+
+xsltproc $scan.xml -o $scan.html
+
+rm $file1 $file2 @scan.xml
+setsid firefox $scan.html &
 ```
 ### Port Scanner
 ```py
