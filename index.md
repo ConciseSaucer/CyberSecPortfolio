@@ -64,10 +64,12 @@ These are the certifications I have aquired or in the process of getting
 *   A 105% - SDEV120 Computing Logic 
 *   A 98% - ITSP132 IT Support Essentials I
 *   A 98% - INFM109 Informatics Fundamentals
-*   A 99% - IT Support Essentials II
-*   A 100% - Introduction to Networking
-*   A 100% - Linux and Virtualization Tech
-*   Ethical Hacking
+*   A 99% - ITSP134 IT Support Essentials II
+*   A 99% - NETI104 Introduction to Networking
+*   A 104% - SVAD111 Linux and Virtualization Tech
+*   IN PROGRESS - SVAD116 Linux Administration
+*   IN PROGRESS - CSIA210 Network Protocol Analysis
+*   IN PROGRESS - CSIA105 Intro Cyber Security
 
 # TryHackMe
 
