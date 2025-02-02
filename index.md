@@ -80,6 +80,8 @@ These are the learning paths I have completed on TryHackMe.com.
 *   SOC Level 1 - 14%
 *   Cyber Defense - 4%
 
+# Guide
+[Gentoo Write Up](GentooGuide.md)
 
 # WORK IN PROGRESS
 
