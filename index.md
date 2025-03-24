@@ -18,7 +18,7 @@ This page is a collection of all my cyber security achievements.
 
 These are the certifications I have aquired or in the process of getting
 
-*   CompTIA Network+ - In progress
+*   CompTIA Network+ - Pass (783)
 *   CompTIA Linux+ - In progress
 *   CompTIA Security+ - In progress
 
@@ -43,7 +43,7 @@ These are the certifications I have aquired or in the process of getting
   - Talked about the cyber academy and answered questions
 - MUTC
   - 10/31/24
-  - Presenation on cyber awareness
+  - Presenation on cyber awareness to MUTC and Ivy Tech faculty/students
     
 # Education
 
@@ -67,9 +67,9 @@ These are the certifications I have aquired or in the process of getting
 *   A 99% - ITSP134 IT Support Essentials II
 *   A 99% - NETI104 Introduction to Networking
 *   A 104% - SVAD111 Linux and Virtualization Tech
-*   IN PROGRESS - SVAD116 Linux Administration
-*   IN PROGRESS - CSIA210 Network Protocol Analysis
-*   IN PROGRESS - CSIA105 Intro Cyber Security
+*   A 102% - SVAD116 Linux Administration
+*   A 98% - CSIA210 Network Protocol Analysis
+*   A 96% - CSIA105 Intro Cyber Security
 
 # TryHackMe
 
