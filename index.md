@@ -18,9 +18,9 @@ This page is a collection of all my cyber security achievements.
 
 These are the certifications I have aquired or in the process of getting
 
-*   CompTIA Network+ - Pass (783)
-*   CompTIA Linux+ - In progress
-*   CompTIA Security+ - In progress
+*   CompTIA Network+ - Pass
+*   CompTIA Linux+ - Pass
+*   CompTIA Security+ - Pass
 
 # Confereneces, Presentations, etc
 
@@ -32,6 +32,7 @@ These are the certifications I have aquired or in the process of getting
   - Human & Artificial Intelligence: Social Engineering Now & Next 
   - In it Together: The FBI’s Effort to Wage Digital Justice Requires Strong Partnerships Within our Community 
 - National Cybersecurity Virtual Career Fair
+- 2025 Cohort mixer
   
 ## Clubs
 *   Cyber Club
