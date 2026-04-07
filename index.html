@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noah Peters | Cybersecurity & Systems</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --text: #00ff41;
+            --dim: #008f11;
+            --user: #5effff;
+            --dir: #d2ff5e;
+            --accent: #0081ff;
+            --border: #222;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            background-color: #121212;
+            color: var(--text);
+            font-family: 'Fira Code', 'Courier New', monospace;
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center;
+        }
+
+        .terminal {
+            width: 100%; max-width: 1200px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: grid;
+            grid-template-rows: 35px 1fr;
+            height: 95vh;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+        }
+
+        .scanline {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.03) 50%);
+            background-size: 100% 3px;
+            pointer-events: none; z-index: 10;
+        }
+
+        .title-bar {
+            background: #1a1a1a; padding: 0 15px;
+            display: flex; align-items: center; border-bottom: 1px solid #333;
+        }
+
+        .layout { display: grid; grid-template-columns: 1fr 320px; overflow: hidden; height: 100%; }
+
+        .main-pane { padding: 40px; overflow-y: auto; scroll-behavior: smooth; }
+        
+        .section { margin-bottom: 80px; opacity: 0; transition: opacity 0.5s ease-in; }
+        .section.triggered { opacity: 1; }
+
+        .prompt-line { font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; }
+        .out-box { 
+            border-left: 2px solid #222; padding: 10px 0 10px 25px; 
+            margin-left: 10px; color: #ccc; line-height: 1.6;
+        }
+
+        .neofetch { display: flex; gap: 40px; align-items: center; margin-bottom: 20px; }
+        .ascii { color: var(--text); font-size: 13px; line-height: 1.1; white-space: pre; }
+        .sys-info p { margin: 4px 0; }
+        .sys-info span { color: var(--accent); font-weight: bold; }
+
+        .sidebar { background: #070707; border-left: 1px solid var(--border); padding: 25px; overflow-y: auto; }
+        .widget { margin-bottom: 40px; }
+        .widget-h { 
+            color: var(--dim); text-transform: uppercase; font-size: 0.75rem; 
+            border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 15px; 
+            letter-spacing: 1.5px;
+        }
+
+        .stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px; }
+        .tag { 
+            display: inline-block; padding: 3px 8px; border: 1px solid var(--dim); 
+            margin: 3px; border-radius: 4px; font-size: 0.7rem; color: #eee;
+        }
+
+        .btn {
+            display: block; width: 100%; padding: 12px; border: 1px solid var(--text);
+            color: var(--text); text-align: center; text-decoration: none; margin-top: 12px;
+            transition: 0.2s; font-size: 0.85rem;
+        }
+        .btn:hover { background: var(--text); color: #000; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th { text-align: left; color: var(--accent); border-bottom: 1px solid #333; padding: 5px; }
+        td { padding: 5px; border-bottom: 1px solid #1a1a1a; }
+
+        @media (max-width: 950px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="terminal">
+    <div class="scanline"></div>
+    <div class="title-bar">
+        <div style="display:flex; gap:8px;">
+            <div style="width:11px;height:11px;border-radius:50%;background:#ff5f56"></div>
+            <div style="width:11px;height:11px;border-radius:50%;background:#ffbd2e"></div>
+            <div style="width:11px;height:11px;border-radius:50%;background:#27c93f"></div>
+        </div>
+        <div style="color: #555; font-size: 11px; margin-left: 20px;">Concise@cyacad-workstation: ~</div>
+    </div>
+
+    <div class="layout">
+        <main class="main-pane" id="main-scroll">
+            
+            <section id="hero" class="section triggered">
+                <div class="neofetch">
+<pre class="ascii">
+███╗   ██╗██████╗ 
+████╗  ██║██╔══██╗
+██╔██╗ ██║██████╔╝
+██║╚██╗██║██╔═══╝ 
+██║ ╚████║██║     
+╚═╝  ╚═══╝╚═╝     
+</pre>
+                    <div class="sys-info">
+                        <p><span>USER</span>: Noah Peters</p>
+                        <p><span>LOCATION</span>: Zionsville, IN</p>
+                        <p><span>ROLE</span>: Cybersecurity & Systems</p>
+                        <p><span>OS</span>: Windows/Linux/MacOS</p>
+                        <p><span>STATUS</span>: CompTIA Security+, Network+, Linux+</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" data-cmd="whoami">
+                <div class="prompt-line">
+                    <span class="user">➜</span> <span class="dir">~</span>&nbsp;<span class="type-target"></span>
+                </div>
+                <div class="out-box" style="display:none;">
+                    <p>Focused on <strong>Defensive Security</strong> and <strong>Network Hardening</strong>. I bridge technical gaps with clear documentation and automated workflows. Active candidate for <strong>CompTIA CySA+</strong>.</p>
+                </div>
+            </section>
+
+            <section class="section" data-cmd="cat ~/logs/honeypot_analysis.log">
+                <div class="prompt-line">
+                    <span class="user">➜</span> <span class="dir">~</span>&nbsp;<span class="type-target"></span>
+                </div>
+                <div class="out-box" style="display:none;">
+                    <h3 style="color:#fff;">Project: Security Exposure & Log Analysis</h3>
+                    <p>Monitored global threat activity on a Debian Nginx server by incrementally relaxing security controls to map botnet behaviors.</p>
+                    
+                    <table>
+                        <thead>
+                            <tr><th>Top Source IP</th><th>Attempts</th><th>Week</th><th>Origin</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>218.92.0.142</td><td>315</td><td>9</td><td>China</td></tr>
+                            <tr><td>2.57.122.191</td><td>261</td><td>9</td><td>Romania</td></tr>
+                            <tr><td>45.148.10.79</td><td>230</td><td>8</td><td>Romania</td></tr>
+                        </tbody>
+                    </table>
+
+                    <p style="margin-top:15px;"><strong>Mitigation:</strong> Neutralized brute-force traffic using <strong>Fail2Ban</strong> and <strong>SSH Key Authentication</strong>.</p>
+                </div>
+            </section>
+
+            <section class="section" data-cmd="cat ~/designs/enterprise_net.md">
+                <div class="prompt-line">
+                    <span class="user">➜</span> <span class="dir">~</span>&nbsp;<span class="type-target"></span>
+                </div>
+                <div class="out-box" style="display:none;">
+                    <h3 style="color:#fff;">Enterprise Windows Infrastructure (SVAD121)</h3>
+                    <p>Architected a complete Windows network utilizing <strong>Active Directory</strong>, <strong>GPOs</strong>, and <strong>DNS/DHCP</strong> for centralized management.</p>
+                    <ul style="list-style: '>> '; padding-left: 20px;">
+                        <li>Designed subnetting schemas to isolate production and guest traffic.</li>
+                        <li>Enforced <strong>Least Privilege</strong> via tailored Group Policy Objects.</li>
+                        <li>Implemented NTFS permissions and Shadow Copies for data redundancy.</li>
+                    </ul>
+                    <p style="margin-top:10px;">
+                        <a href="https://github.com/ConciseSaucer/SVAD121Final" target="_blank" rel="noopener noreferrer" style="color:var(--text)">VIEW_FULL_PROPOSAL [↗]</a>
+                    </p>
+                </div>
+            </section>
+
+            <section class="section" data-cmd="python3 automation_suite.py">
+                <div class="prompt-line">
+                    <span class="user">➜</span> <span class="dir">~</span>&nbsp;<span class="type-target"></span>
+                </div>
+                <div class="out-box" style="display:none;">
+                    <p><strong>[+] <a href="https://github.com/ConciseSaucer/CyberSecPortfolio/blob/main/PortScanner.py" target="_blank" rel="noopener noreferrer" style="color:var(--text)">Port Scanner</a>:</strong> Multithreaded TCP port discovery.</p>
+                    <p><strong>[+] <a href="https://github.com/ConciseSaucer/CyberSecPortfolio/blob/main/PasswordCrack.py" target="_blank" rel="noopener noreferrer" style="color:var(--text)">Password Crack</a>:</strong> Dictionary-based authentication testing.</p>
+                     <p><strong>[+] <a href="https://github.com/ConciseSaucer/CyberSecPortfolio/blob/main/IntergrityMonitor.py" target="_blank" rel="noopener noreferrer" style="color:var(--text)">Integrity Monitor</a>:</strong> Real-time hashing for file change detection.</p>
+                </div>
+            </section>
+
+            <section class="section" data-cmd="curl -s https://noah.cyacad.com/contact">
+                <div class="prompt-line">
+                    <span class="user">➜</span> <span class="dir">~</span>&nbsp;<span class="type-target"></span>
+                </div>
+                <div class="out-box" style="display:none;">
+                    <p>Email: <a href="mailto:noah@cyacad.com" style="color:var(--text)">noah@cyacad.com</a></p>
+                    <p>LinkedIn: <a href="https://www.linkedin.com/in/cyber-noah-peters/" target="_blank" rel="noopener noreferrer" style="color:var(--text)">LinkedIn [↗]</a></p>
+                    <p>GitHub: <a href="https://github.com/ConciseSaucer" target="_blank" rel="noopener noreferrer" style="color:var(--text)">Github [↗]</a></p>
+                </div>
+            </section>
+
+        </main>
+
+        <aside class="sidebar">
+            <div class="widget">
+                <div class="widget-h">Session Intelligence</div>
+                <div class="stat-row"><span>Uptime:</span><span id="uptime">0d 0h 0m 0s</span></div>
+                <div class="stat-row"><span>Traffic:</span><span style="color:#27c93f">ENCRYPTED</span></div>
+                <div class="stat-row"><span>Threat:</span><span style="color:#ffbd2e">ELEVATED</span></div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-h">Threat Intelligence</div>
+                <div class="stat-row"><span>Peak Hit:</span><span>315 (CN)</span></div>
+                <div class="stat-row"><span>Top Origin:</span><span>Romania / China</span></div>
+                <div class="stat-row"><span>Unique IPs:</span><span>50+ Logged</span></div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-h">Credential Stack</div>
+                <div class="stat-row"><span>Security+</span><span style="color:gold;">[OK]</span></div>
+                <div class="stat-row"><span>Network+</span><span style="color:gold;">[OK]</span></div>
+                <div class="stat-row"><span>Linux+</span><span style="color:gold;">[OK]</span></div>
+                <div class="stat-row" style="margin-top:10px; font-size:10px;">CySA+ Prep: 75%</div>
+                <div style="width:100%; height:4px; background:#222;"><div style="width:75%; height:100%; background:var(--accent);"></div></div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-h">Active Arsenal</div>
+                <span class="tag">Active Directory</span> <span class="tag">Splunk</span>
+                <span class="tag">Nmap</span> <span class="tag">pfSense</span>
+                <span class="tag">Python</span> <span class="tag">Windows Server</span>
+                <span class="tag">Bash</span> <span class="tag">NIST CSF</span>
+            </div>
+
+            <div class="widget">
+                <div class="widget-h">Documentation</div>
+                <a href="Noah Peters Resume.pdf" class="btn" target="_blank" rel="noopener noreferrer" download>PDF_RESUME [↗]</a>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const observerOptions = { threshold: 0.6 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !entry.target.classList.contains('triggered')) {
+                const section = entry.target;
+                const cmdText = section.getAttribute('data-cmd');
+                if(!cmdText) return;
+                const target = section.querySelector('.type-target');
+                const content = section.querySelector('.out-box');
+                section.classList.add('triggered');
+                typeCommand(target, cmdText, () => { content.style.display = 'block'; });
+            }
+        });
+    }, observerOptions);
+
+    function typeCommand(element, text, callback) {
+        if (!element) { callback(); return; }
+        let i = 0;
+        function type() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i); i++;
+                setTimeout(type, 40);
+            } else { callback(); }
+        }
+        type();
+    }
+    document.querySelectorAll('.section[data-cmd]').forEach(s => observer.observe(s));
+
+    // Career Chronometer
+    const startDate = new Date("2024-09-01T00:00:00"); 
+    function updateCareerUptime() {
+        const now = new Date();
+        const diff = now - startDate;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        const display = document.getElementById('uptime');
+        if (display) display.innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+    updateCareerUptime();
+    setInterval(updateCareerUptime, 1000);
+</script>
+</body>
+</html>
