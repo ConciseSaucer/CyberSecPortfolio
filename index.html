@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noah Peters | Cybersecurity & Systems</title>
+    <title>Noah Peters | Cybersecurity </title>
+    <link rel="icon" type="image/png" href="terminal.png">
     <style>
         :root {
             --bg: #0a0a0a;
@@ -67,7 +68,7 @@
         .sys-info span { color: var(--accent); font-weight: bold; }
 
         .sidebar { background: #070707; border-left: 1px solid var(--border); padding: 25px; overflow-y: auto; }
-        .widget { margin-bottom: 40px; }
+        .widget { margin-bottom: 30px; }
         .widget-h { 
             color: var(--dim); text-transform: uppercase; font-size: 0.75rem; 
             border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 15px; 
@@ -78,6 +79,11 @@
         .tag { 
             display: inline-block; padding: 3px 8px; border: 1px solid var(--dim); 
             margin: 3px; border-radius: 4px; font-size: 0.7rem; color: #eee;
+        }
+
+        .log-stream { 
+            font-size: 0.7rem; color: #555; height: 80px; overflow: hidden; 
+            line-height: 1.4; font-family: monospace;
         }
 
         .btn {
@@ -104,7 +110,7 @@
             <div style="width:11px;height:11px;border-radius:50%;background:#ffbd2e"></div>
             <div style="width:11px;height:11px;border-radius:50%;background:#27c93f"></div>
         </div>
-        <div style="color: #555; font-size: 11px; margin-left: 20px;">Concise@cyacad-workstation: ~</div>
+        <div style="color: #555; font-size: 11px; margin-left: 20px;">noah@cyacad: ~</div>
     </div>
 
     <div class="layout">
@@ -122,10 +128,9 @@
 </pre>
                     <div class="sys-info">
                         <p><span>USER</span>: Noah Peters</p>
-                        <p><span>LOCATION</span>: Zionsville, IN</p>
-                        <p><span>ROLE</span>: Cybersecurity & Systems</p>
-                        <p><span>OS</span>: Windows/Linux/MacOS</p>
-                        <p><span>STATUS</span>: CompTIA Security+, Network+, Linux+</p>
+                        <p><span>LOCATION</span>: Omaha, NE</p>
+                        <p><span>ROLE</span>: Cybersecurity </p>
+                        <p><span>STATUS</span>: Sec+, Net+, Linux+</p>
                     </div>
                 </div>
             </section>
@@ -135,7 +140,15 @@
                     <span class="user">➜</span> <span class="dir">~</span>&nbsp;<span class="type-target"></span>
                 </div>
                 <div class="out-box" style="display:none;">
-                    <p>Focused on <strong>Defensive Security</strong> and <strong>Network Hardening</strong>. I bridge technical gaps with clear documentation and automated workflows. Active candidate for <strong>CompTIA CySA+</strong>.</p>
+                    <p>
+                        I focus on the intersection of systems administration and defensive auditing. My technical background is centered on building Windows and Linux environments where security is a functional requirement—specifically through role-based access control, GPO enforcement, and network segmentation.
+                    </p>
+                    <p style="margin-top: 10px;">
+                        My analytical work involves identifying misconfigurations and vulnerabilities by monitoring real-world traffic and log data. I prioritize verifying that security controls are functioning as intended, moving past theoretical design to data-driven vulnerability management.
+                    </p>
+                    <p style="color: #555; font-size: 10px; margin-top: 15px; border-top: 1px solid #1a1a1a; padding-top: 8px;">
+                        [!] Session verified | Last Audit: 2026-04-7
+                    </p>
                 </div>
             </section>
 
@@ -145,7 +158,7 @@
                 </div>
                 <div class="out-box" style="display:none;">
                     <h3 style="color:#fff;">Project: Security Exposure & Log Analysis</h3>
-                    <p>Monitored global threat activity on a Debian Nginx server by incrementally relaxing security controls to map botnet behaviors.</p>
+                    <p>Monitored global threat activity on a Debian Nginx server by incrementally relaxing security controls to monitor attacker behaviors.</p>
                     
                     <table>
                         <thead>
@@ -209,14 +222,18 @@
                 <div class="widget-h">Session Intelligence</div>
                 <div class="stat-row"><span>Uptime:</span><span id="uptime">0d 0h 0m 0s</span></div>
                 <div class="stat-row"><span>Traffic:</span><span style="color:#27c93f">ENCRYPTED</span></div>
-                <div class="stat-row"><span>Threat:</span><span style="color:#ffbd2e">ELEVATED</span></div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-h">Live System Logs</div>
+                <div class="log-stream" id="log-stream"></div>
             </div>
 
             <div class="widget">
                 <div class="widget-h">Threat Intelligence</div>
                 <div class="stat-row"><span>Peak Hit:</span><span>315 (CN)</span></div>
-                <div class="stat-row"><span>Top Origin:</span><span>Romania / China</span></div>
-                <div class="stat-row"><span>Unique IPs:</span><span>50+ Logged</span></div>
+                <div class="stat-row"><span>Origin:</span><span>Romania / China</span></div>
+                <div class="stat-row"><span>Status:</span><span style="color:#ffbd2e">MONITORING</span></div>
             </div>
 
             <div class="widget">
@@ -232,13 +249,13 @@
                 <div class="widget-h">Active Arsenal</div>
                 <span class="tag">Active Directory</span> <span class="tag">Splunk</span>
                 <span class="tag">Nmap</span> <span class="tag">pfSense</span>
-                <span class="tag">Python</span> <span class="tag">Windows Server</span>
-                <span class="tag">Bash</span> <span class="tag">NIST CSF</span>
+                <span class="tag">Python</span> <span class="tag">GPO</span>
+                <span class="tag">Bash</span> <span class="tag">Wireshark</span>
             </div>
 
             <div class="widget">
                 <div class="widget-h">Documentation</div>
-                <a href="Noah Peters Resume.pdf" class="btn" target="_blank" rel="noopener noreferrer" download>PDF_RESUME [↗]</a>
+                <a href="Noah Peters Resume.pdf" class="btn" target="_blank" rel="noopener noreferrer" download>PDF_RESUME_STABLE</a>
             </div>
         </aside>
     </div>
@@ -266,7 +283,7 @@
         function type() {
             if (i < text.length) {
                 element.innerHTML += text.charAt(i); i++;
-                setTimeout(type, 40);
+                setTimeout(type, 35);
             } else { callback(); }
         }
         type();
@@ -287,6 +304,32 @@
     }
     updateCareerUptime();
     setInterval(updateCareerUptime, 1000);
+
+    // Sidebar Log Cycler
+    const logs = [
+        "SSH: Accepted password for root from 192.168.1.105",
+        "WAF: Blocked HTTPS request from 218.92.0.142",
+        "GPO: Security policy baseline applied to OU=Management",
+        "DHCP: Lease 10.0.0.52 assigned to WORKSTATION-04",
+        "FIM: Integrity check PASSED for /etc/shadow",
+        "SSH: Failed password for invalid user admin from 2.57.122.191",
+        "Nginx: Inbound connection on port 443: SUCCESS",
+        "SysLog: Kernel hardening audit complete.",
+        "DNS: Recursive query resolved for cyacad.com"
+    ];
+
+    const logStream = document.getElementById('log-stream');
+    function addLog() {
+        const log = logs[Math.floor(Math.random() * logs.length)];
+        const div = document.createElement('div');
+        div.textContent = `> ${log}`;
+        logStream.prepend(div);
+        if (logStream.children.length > 5) {
+            logStream.removeChild(logStream.lastChild);
+        }
+    }
+    setInterval(addLog, 3000);
+    addLog();
 </script>
 </body>
 </html>
