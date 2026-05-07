@@ -26,7 +26,19 @@
             color: var(--text-main);
             font-family: 'Fira Code', 'Courier New', monospace;
         }
-
+                /* --- KNOWLEDGE REPO IMAGE STYLING --- */
+        .note-img-wrapper {
+            margin: 15px 0;
+            text-align: center; /* Centers the image if it is smaller than the window */
+        }
+        
+        .terminal-img {
+            max-width: 100%; /* Forces the image to shrink to fit the container's width */
+            height: auto; /* Ensures the image doesn't stretch or squish */
+            border: 1px solid var(--glass-border); /* Matches your glassmorphism panels */
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.15); /* Adds a very faint purple glow */
+        }
         /* --- ANIMATED BACKGROUND CANVAS --- */
         #network-canvas {
             position: fixed;
