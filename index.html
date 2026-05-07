@@ -574,38 +574,12 @@ _-_-|______|-----------|_____||     ||_____|-----------|______|-_-_
         else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = (selectedIndex - 1 + filteredCommands.length) % filteredCommands.length; renderList(); }
         else if (e.key === 'Enter') { e.preventDefault(); closePalette(); window.location.href = filteredCommands[selectedIndex].file; }
     });
-    async function loadNoteList() {
-    const response = await fetch('./notes/manifest.json');
-    const notes = await response.json();
-    const listContainer = document.getElementById('knowledge-repo-list'); // Your purple window list
-
-    notes.forEach(note => {
-        const link = document.createElement('a');
-        link.innerText = `> ${note.title}`;
-        link.href = "#";
-        link.className = "terminal-link";
-        link.onclick = (e) => {
-            e.preventDefault();
-            displayNote(note.filename);
-        };
-        listContainer.appendChild(link);
-    });
-}
-
-    async function displayNote(filename) {
-        const response = await fetch(`./notes/${filename}`);
-        const html = await response.text();
-        document.getElementById('note-display-area').innerHTML = html;
-    }
-
-    // Initialize when the page loads
-    loadNoteList();
 
     // ==========================================
 // KNOWLEDGE REPO / NOTES VAULT LOGIC
 // ==========================================
 
-const NOTES_PATH = './content/notes'; // Must match where your GitHub Action drops the files
+const NOTES_PATH = '/content/notes'; // Must match where your GitHub Action drops the files
 const listContainer = document.getElementById('knowledge-repo-list');
 const displayArea = document.getElementById('note-display-area');
 
