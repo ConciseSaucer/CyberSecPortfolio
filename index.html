@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noah Peters | Analyst Profile</title>
+    <style>
+        :root {
+            --bg-dark: #05010a;
+            --panel-bg: rgba(30, 10, 50, 0.4); 
+            --glass-border: rgba(168, 85, 247, 0.3);
+            --glass-highlight: rgba(168, 85, 247, 0.6);
+            --text-main: #e9d5ff;
+            --text-dim: #a855f7;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #d946ef;
+            --accent-dim: #8b5cf6;
+            --font-mono: 'Fira Code', 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        /* --- ANIMATED BACKGROUND CANVAS --- */
+        #network-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(168, 85, 247, 0.08), transparent 30%),
+                radial-gradient(circle at 85% 30%, rgba(34, 211, 238, 0.05), transparent 30%);
+        }
+
+        /* --- OS VIRTUAL WORKSPACE CSS --- */
+        #os-workspace {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            overflow-x: hidden; overflow-y: auto;
+        }
+
+        .slide-out-left { transform: translateX(-100vw); opacity: 0; }
+        .slide-out-right { transform: translateX(100vw); opacity: 0; }
+        .slide-in-from-right { animation: slideInRight 0.4s forwards cubic-bezier(0.4, 0, 0.2, 1); }
+        .slide-in-from-left { animation: slideInLeft 0.4s forwards cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes slideInRight { 0% { transform: translateX(100vw); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes slideInLeft { 0% { transform: translateX(-100vw); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+
+        /* --- DASHBOARD GRID --- */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px; width: 100%; max-width: 1400px;
+            margin: 80px auto 40px auto; padding: 0 2rem; z-index: 1; 
+        }
+
+        .glass-panel {
+            background: var(--panel-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
+            border-radius: 16px; padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(168, 85, 247, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 0 25px rgba(168, 85, 247, 0.1);
+            border-color: var(--glass-highlight);
+        }
+
+        .panel-header {
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--text-dim); border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .status-dot { width: 8px; height: 8px; background-color: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 10px var(--accent-cyan); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; box-shadow: 0 0 5px var(--accent-cyan); } 50% { opacity: 1; box-shadow: 0 0 15px var(--accent-cyan); } }
+
+        /* Grid Spans */
+        .span-12 { grid-column: span 12; }
+        .hero-panel { grid-column: span 8; }
+        .cert-panel { grid-column: span 4; }
+        .links-panel { grid-column: span 6; }
+        .interactive-panel { grid-column: span 6; display: flex; flex-direction: column; }
+
+        @media (max-width: 1024px) {
+            .hero-panel, .cert-panel, .links-panel, .interactive-panel { grid-column: span 12; }
+        }
+
+        /* --- ANALYST MODE TOGGLE --- */
+        #mode-toggle-container {
+            position: fixed; top: 20px; right: 30px; z-index: 1000;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(10, 5, 20, 0.8); padding: 8px 15px; border-radius: 30px;
+            border: 1px solid var(--glass-border); backdrop-filter: blur(8px);
+        }
+        .toggle-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: var(--text-dim); transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-cyan); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: #fff; box-shadow: 0 0 10px #fff; }
+
+        /* ANALYST MODE CSS RULES */
+        .analyst-view { display: none; }
+        .tech-view { display: block; }
+        body.analyst-mode .tech-view { display: none; }
+        body.analyst-mode .analyst-view { display: block; }
+
+        /* Neofetch & Progress Styles */
+        .neofetch-container { display: flex; gap: 30px; align-items: center; }
+        .ascii-art { color: var(--accent-pink); font-size: 14px; line-height: 1.2; text-shadow: 0 0 10px rgba(217, 70, 239, 0.5); }
+        .sys-info p { margin: 8px 0; font-size: 0.95rem; }
+        .sys-info span { color: var(--accent-cyan); font-weight: bold; }
+        .typing-text { border-right: 2px solid var(--accent-cyan); white-space: nowrap; overflow: hidden; }
+        .cert-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .cert-badge { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--text-dim); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .cert-badge.active { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .progress-container { margin-top: 25px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-dim); }
+        .progress-track { width: 100%; height: 6px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border); }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--text-dim), var(--accent-pink)); box-shadow: 0 0 10px var(--accent-pink); transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Interactive Sandbox Styles */
+        .sandbox-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; margin-top: 15px; }
+        .pwd-input { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: #fff; padding: 10px 15px; font-family: 'Fira Code', monospace; border-radius: 6px; margin-bottom: 15px; font-size: 1rem; outline: none; }
+        .pwd-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(34, 211, 238, 0.3); }
+        .math-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .math-stat { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border-left: 3px solid var(--text-dim); }
+        .math-stat h4 { margin: 0 0 5px 0; font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; }
+        .math-stat div { font-size: 1.1rem; color: #fff; }
+
+        /* Command Palette Styles */
+        #cmd-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 10000; display: flex; justify-content: center; align-items: flex-start; padding-top: 15vh; opacity: 1; transition: opacity 0.2s ease; }
+        #cmd-overlay.cmd-hidden { opacity: 0; pointer-events: none; }
+        #cmd-palette { width: 100%; max-width: 600px; background: rgba(15, 5, 25, 0.9); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(168, 85, 247, 0.1); transform: translateY(0); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        #cmd-overlay.cmd-hidden #cmd-palette { transform: translateY(-20px); }
+        .cmd-header { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 1.1rem; }
+        #cmd-input { background: transparent; border: none; color: #fff; font-family: 'Fira Code', monospace; font-size: 1.1rem; width: 100%; margin-left: 10px; outline: none; }
+        #cmd-list { list-style: none; margin: 0; padding: 10px; max-height: 300px; overflow-y: auto; }
+        .cmd-item { padding: 12px 15px; color: #a1a1aa; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
+        .cmd-item.selected, .cmd-item:hover { background: rgba(168, 85, 247, 0.2); color: #fff; }
+        .cmd-footer { padding: 10px 20px; background: rgba(0, 0, 0, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: flex-end; gap: 15px; font-size: 0.75rem; color: #71717a; }
+        kbd { background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; font-family: inherit; }
+
+        #mobile-cmd-trigger { position: fixed; bottom: 30px; right: 30px; background: rgba(15, 5, 25, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(168, 85, 247, 0.3); color: #a1a1aa; padding: 12px 20px; border-radius: 30px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 0.9rem; z-index: 9990; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        #mobile-cmd-trigger:hover { background: rgba(168, 85, 247, 0.2); color: #fff; border-color: rgba(168, 85, 247, 0.8); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(168, 85, 247, 0.2); }
+        #cmd-overlay:not(.cmd-hidden) ~ #mobile-cmd-trigger { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="mode-toggle-container">
+    <span class="toggle-label" id="mode-text">Standard View</span>
+    <label class="switch">
+        <input type="checkbox" id="analyst-toggle" onchange="toggleAnalystMode()">
+        <span class="slider"></span>
+    </label>
+</div>
+
+<canvas id="network-canvas"></canvas>
+
+<div id="os-workspace">
+    <div class="dashboard">
+                <div class="glass-panel hero-panel">
+            <div class="panel-header">
+                <span>System Profile // Neofetch</span>
+            </div>
+            <div class="neofetch-container">
+<pre class="ascii-art">
+███╗   ██╗██████╗ 
+████╗  ██║██╔══██╗
+██╔██╗ ██║██████╔╝
+██║╚██╗██║██╔═══╝ 
+██║ ╚████║██║     
+╚═╝  ╚═══╝╚═╝     
+</pre>
+                <div class="sys-info">
+                    <p><span>USER@HOST</span>: noah@cyacad_portfolio</p>
+                    <p><span>ROLE</span>: Systems Admin & Vulnerability Analyst</p>
+                    <p><span>OS</span>: PurpleOS v2.0 (Glassmorphism Branch)</p>
+                    <p><span>EDUCATION</span>: Associate Degree (IT)</p>
+                    <p><span>UPTIME</span>: <span id="uptime">Loading...</span></p>
+                    <p class="typing-text" id="typewriter"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel cert-panel">
+            <div class="panel-header">
+                <span class="tech-view">Credential Stack</span>
+                <span class="analyst-view">Blacksmith Hallmarks</span>
+            </div>
+            <div class="cert-grid">
+                <div class="cert-badge active">
+                    <span>CompTIA Security+</span>
+                    <span>[ VALID ]</span>
+                </div>
+                <div class="cert-badge active">
+                    <span>CompTIA Network+</span>
+                    <span>[ VALID ]</span>
+                </div>
+                <div class="cert-badge active">
+                    <span>CompTIA Linux+</span>
+                    <span>[ VALID ]</span>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>CySA+ Preparation</span>
+                    <span id="cysa-percent">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="cysa-fill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="glass-panel span-12" style="display: flex; flex-wrap: wrap; align-items: center; gap: 30px;">
+            <div style="color: var(--accent-dim); font-size: 1rem; text-shadow: 0 0 10px var(--accent-dim); line-height: 1.1; display: flex; justify-content: center; min-width: 150px; overflow-x: auto; max-width: 100%;">
+<pre style="margin: 0; font-family: var(--font-mono); font-weight: bold; color: var(--accent-pink);">
+    |>>>                                                      |>>>
+    |                     |>>>          |>>>                  |
+    *                     |             |                     *
+   / \                    *             *                    / \
+  /___\                 _/ \           / \_                 /___\
+  [   ]                |/   \_________/   \|                [   ]
+  [ I ]                /     \       /     \                [ I ]
+  [   ]_ _ _          /       \     /       \          _ _ _[   ]
+  [   ] U U |        {#########}   {#########}        | U U [   ]
+  [   ]====/          \=======/     \=======/          \====[   ]
+  [   ]    |           |   I |_ _ _ _| I   |           |    [   ]
+  [___]    |_ _ _ _ _ _|     | U U U |     |_ _ _ _ _ _|    [___]
+  \===/  I | U U U U U |     |=======|     | U U U U U | I  \===/
+   \=/     |===========| I   | + W + |   I |===========|     \=/
+    |  I   |           |     |_______|     |           |   I  |
+    |      |           |     |||||||||     |           |      |
+    |      |           |   I ||vvvvv|| I   |           |      |
+_-_-|______|-----------|_____||     ||_____|-----------|______|-_-_
+   /________\         /______||     ||______\         /________\
+  |__________|-------|________\_____/________|-------|__________|
+</pre>
+            </div>
+            <div style="flex: 1; min-width: 300px;">
+                <div class="panel-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 10px;">
+                    <span class="tech-view" style="font-size: 1.2rem; color: #fff;">Architecture Vault: Systems Administration</span>
+                    <span class="analyst-view" style="font-size: 1.2rem; color: #fff;">The Strategic Forge: Where Tools are Built</span>
+                </div>
+                <p class="tech-view" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin: 0;">
+                    Welcome to the central configuration profile. This workspace details the underlying infrastructure logic, cryptography standards, and vulnerability analysis frameworks that power the defensive and offensive capabilities demonstrated in the adjacent workspaces.
+                </p>
+                <p class="analyst-view" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin: 0;">
+                    Welcome to Analyst Mode. A master blacksmith doesn't just swing a sword or hide behind a shield; they understand the engineering required to build both. This mode translates complex cybersecurity architecture into strategic, plain-English analogies to bridge the gap between engineering and risk management.
+                </p>
+            </div>
+        </div>
+
+        <div class="glass-panel span-12">
+            <div class="panel-header">
+                <span class="tech-view">IAM Architecture // Cryptographic Hashes</span>
+                <span class="analyst-view">The Blacksmith's Locks // Passwords & Cracking</span>
+                <div class="status-dot"></div>
+            </div>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 30px;">
+            <div style="flex: 1; min-width: 300px; line-height: 1.7; font-size: 0.9rem;">
+                
+                <div class="tech-view">
+                    <p style="margin-top: 0;"><strong>Vulnerability Mitigation: Brute Force vs. Dictionary</strong><br>
+                    Systems administration requires designing authentication pipelines resilient to mass compromise. A brute force attack relies on sheer GPU computational throughput to iterate through keyspaces. Conversely, a dictionary attack exploits low-entropy human behavior by hashing pre-computed lists (Rainbow Tables) to achieve high-volume breaches instantly.</p>
+                    
+                    <p><strong>The Solution: Salts & Key Stretching</strong><br>
+                    To mitigate this, modern architectures do not store raw hashes. We utilize <strong>Argon2id</strong>, introducing a per-user cryptographically secure pseudorandom number (the Salt) appended to the string. This destroys the utility of Rainbow Tables. We then configure high iteration counts (Key Stretching) to ensure the hashing process is intentionally latency-heavy, mathematically exhausting any hardware attempting an offline brute force.</p>
+                </div>
+
+                <div class="analyst-view">
+                    <p style="margin-top: 0;"><strong>The Threat: Master Keys vs. Brute Force</strong><br>
+                    Think of a brute force attack as someone trying to kick down a front door—it’s loud, slow, and requires massive physical effort. A dictionary attack, however, is like a thief with a ring of "Master Keys." Instead of breaking the door, they try 10,000 common keys they've found elsewhere, hoping your lock is one of the standard ones that matches their pre-cut list.</p>
+                    
+                    <p><strong>The Solution: The Custom Lock (Salting)</strong><br>
+                    To stop the thief, we "Salt" the password. Salting is like a Blacksmith forging a completely unique lock cylinder for every single door. Even if the thief steals a Master Key list that works for a million other houses, those keys are physically incompatible with your custom cylinder. Your lock effectively speaks a language the thief's keys don't understand.</p>
+                    
+                    <p><strong>Exhausting the Attacker: "The Sticky Mechanism" (Stretching)</strong><br>
+                    Finally, we use Key Stretching to make the lock "sticky." It takes a legitimate resident one second to turn the key. For a person entering their home once a day, the delay is invisible. But for an intruder trying to rotate through 14 trillion keys rapidly, that one-second delay per attempt forces their "instant" attack to take hundreds of years to complete.</p>
+                </div>
+            </div>
+        </div>
+
+                <div style="flex: 1; min-width: 300px;">
+                    <div class="sandbox-box">
+                        <div style="font-size: 0.85rem; color: var(--accent-cyan); margin-bottom: 10px; font-weight: bold;">
+                            <span class="tech-view">[LIVE] Entropy & Exhaustion Calculator</span>
+                            <span class="analyst-view">[LIVE] Test Your Shield Strength</span>
+                        </div>
+                        <input type="text" id="pwd-test" class="pwd-input" placeholder="Type a test password..." oninput="calculateCracking()">
+                        
+                        <div class="math-grid">
+                            <div class="math-stat" id="stat-dict">
+                                <h4 class="tech-view">Dictionary Match</h4>
+                                <h4 class="analyst-view">Boss Cheat Vulnerability</h4>
+                                <div id="dict-result" style="color: #4ade80;">Safe</div>
+                            </div>
+                            <div class="math-stat" id="stat-brute">
+                                <h4 class="tech-view">Brute Force Duration</h4>
+                                <h4 class="analyst-view">Time to Break Ice Armor</h4>
+                                <div id="brute-result">Instant</div>
+                            </div>
+                        </div>
+                        
+                        <p style="font-size: 0.75rem; color: #a1a1aa; margin-top: 15px; line-height: 1.5;">
+                            * Assuming an offline attack rig capable of 100 Billion hashes/second against a standard unsalted MD5 hash versus a Salted/Stretched key.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-panel span-12">
+    <div class="panel-header">
+        <span class="tech-view">Documentation // Vault Relay</span>
+        <span class="analyst-view">The Ledger // Knowledge Base</span>
+        <div class="status-dot"></div>
+    </div>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px; border-right: 1px solid var(--glass-border); padding-right: 20px; max-height: 400px; overflow-y: auto;">
+            <div id="knowledge-repo-list" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+                </div>
+        </div>
+        
+        <div style="flex: 3; min-width: 300px; max-height: 400px; overflow-y: auto; padding-left: 10px;" id="note-display-area">
+            <p style="color: var(--text-dim); font-style: italic;">[ System idle. Select a file from the repository to execute. ]</p>
+        </div>
+    </div>
+</div>
+        </div>
+        
+    
+
+    </div> 
+</div> 
+
+<button id="mobile-cmd-trigger" onclick="openPalette()" title="Open Command Palette">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <span>cmd</span>
+</button>
+
+<div id="cmd-overlay" class="cmd-hidden">
+    <div id="cmd-palette">
+        <div class="cmd-header">
+            <span style="color: #a855f7;">> root@cyacad:</span>
+            <input type="text" id="cmd-input" placeholder="Type a destination or command..." autocomplete="off" spellcheck="false">
+        </div>
+        <ul id="cmd-list"></ul>
+        <div class="cmd-footer">
+            <span><kbd>↑</kbd> <kbd>↓</kbd> to navigate</span>
+            <span><kbd>Enter</kbd> to execute</span>
+            <span><kbd>ESC</kbd> to cancel</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- ANALYST MODE LOGIC ---
+    function toggleAnalystMode() {
+        const isChecked = document.getElementById('analyst-toggle').checked;
+        const body = document.body;
+        const textLabel = document.getElementById('mode-text');
+        
+        if(isChecked) {
+            body.classList.add('analyst-mode');
+            textLabel.innerText = "Analyst View";
+            textLabel.style.color = "var(--accent-cyan)";
+        } else {
+            body.classList.remove('analyst-mode');
+            textLabel.innerText = "Standard View";
+            textLabel.style.color = "var(--text-dim)";
+        }
+    }
+
+    // --- PASSWORD SANDBOX LOGIC ---
+    const commonPasswords = ['password', '123456', 'qwerty', 'admin', 'letmein', 'dragon', 'baseball', 'welcome'];
+    
+    function calculateCracking() {
+        const input = document.getElementById('pwd-test').value;
+        const dictBox = document.getElementById('stat-dict');
+        const dictRes = document.getElementById('dict-result');
+        const bruteBox = document.getElementById('stat-brute');
+        const bruteRes = document.getElementById('brute-result');
+
+        if(input.length === 0) {
+            dictRes.innerText = "Awaiting input..."; dictRes.style.color = "#fff"; dictBox.style.borderColor = "var(--text-dim)";
+            bruteRes.innerText = "Awaiting input..."; bruteRes.style.color = "#fff"; bruteBox.style.borderColor = "var(--text-dim)";
+            return;
+        }
+
+        // Dictionary Check
+        if(commonPasswords.includes(input.toLowerCase())) {
+            dictRes.innerText = "MATCH FOUND"; dictRes.style.color = "var(--accent-pink)"; dictBox.style.borderColor = "var(--accent-pink)";
+        } else {
+            dictRes.innerText = "NOT IN DICTIONARY"; dictRes.style.color = "#4ade80"; dictBox.style.borderColor = "#4ade80";
+        }
+
+        // Brute Force Math (Extremely simplified for demonstration)
+        const charset = 94; // standard keyboard characters
+        const combinations = Math.pow(charset, input.length);
+        const hashesPerSecond = 100000000000; // 100 Billion/sec
+        const seconds = combinations / hashesPerSecond;
+
+        let timeStr = "";
+        if (seconds < 1) timeStr = "Instant";
+        else if (seconds < 60) timeStr = Math.round(seconds) + " seconds";
+        else if (seconds < 3600) timeStr = Math.round(seconds/60) + " minutes";
+        else if (seconds < 86400) timeStr = Math.round(seconds/3600) + " hours";
+        else if (seconds < 31536000) timeStr = Math.round(seconds/86400) + " days";
+        else if (seconds < 3153600000) timeStr = Math.round(seconds/31536000) + " years";
+        else timeStr = "Centuries";
+
+        if(seconds < 3600) {
+            bruteRes.innerText = timeStr; bruteRes.style.color = "var(--accent-pink)"; bruteBox.style.borderColor = "var(--accent-pink)";
+        } else {
+            bruteRes.innerText = timeStr; bruteRes.style.color = "#4ade80"; bruteBox.style.borderColor = "#4ade80";
+        }
+    }
+
+    // --- CANVAS NETWORK ANIMATION ---
+    const canvas = document.getElementById('network-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    
+    function initCanvas() {
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width; canvas.height = height;
+    }
+    window.addEventListener('resize', initCanvas); initCanvas();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * width; this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5;
+            this.radius = Math.random() * 2 + 1;
+            this.color = Math.random() > 0.5 ? 'rgba(168, 85, 247, 0.5)' : 'rgba(34, 211, 238, 0.5)';
+        }
+        update() {
+            this.x += this.vx; this.y += this.vy;
+            if (this.x < 0 || this.x > width) this.vx *= -1;
+            if (this.y < 0 || this.y > height) this.vy *= -1;
+        }
+        draw() {
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color; ctx.fill();
+        }
+    }
+
+    const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 15000);
+    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update(); particles[i].draw();
+            for (let j = i; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 120) {
+                    ctx.beginPath(); const opacity = 1 - (distance / 120);
+                    ctx.strokeStyle = `rgba(168, 85, 247, ${opacity * 0.2})`;
+                    ctx.lineWidth = 1; ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    // --- DASHBOARD WIDGETS ---
+    const startDate = new Date("2024-09-01T00:00:00"); 
+    setInterval(() => {
+        const diff = new Date() - startDate;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        document.getElementById('uptime').innerText = `${days}d ${hours}h ${minutes}m`;
+    }, 1000);
+
+    const textToType = "MISSION: Securing infrastructure through data-driven vulnerability analysis.";
+    const typeTarget = document.getElementById('typewriter');
+    let typeIndex = 0;
+    setTimeout(() => {
+        function typeWriter() {
+            if (typeIndex < textToType.length) {
+                typeTarget.innerHTML += textToType.charAt(typeIndex);
+                typeIndex++; setTimeout(typeWriter, 40);
+            }
+        }
+        typeWriter();
+    }, 500);
+
+    setTimeout(() => {
+        document.getElementById('cysa-fill').style.width = '75%';
+        let count = 0; const counterTarget = document.getElementById('cysa-percent');
+        const interval = setInterval(() => {
+            if(count >= 75) clearInterval(interval);
+            else { count++; counterTarget.innerText = count + '%'; }
+        }, 20); 
+    }, 800);
+
+    // --- COMMAND PALETTE LOGIC ---
+    const cmdOverlay = document.getElementById('cmd-overlay');
+    const cmdInput = document.getElementById('cmd-input');
+    const cmdList = document.getElementById('cmd-list');
+
+    const commands = [
+        { name: "Blue // Defensive Operations", id: "blue", file: "blue.html", direction: "left", keywords: ["blue", "defend", "defense", "soc", "monitor"] },
+        { name: "Purple // Analyst Profile", id: "purple", file: "index.html", direction: "center", keywords: ["purple", "about", "profile", "certs", "home"] },
+        { name: "Red // Offensive Operations", id: "red", file: "red.html", direction: "right", keywords: ["red", "offense", "attack", "exploit", "tools"] }
+    ];
+
+    let selectedIndex = 0; let filteredCommands = [...commands];
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== cmdInput) { e.preventDefault(); openPalette(); }
+        if (e.key === 'Escape' && !cmdOverlay.classList.contains('cmd-hidden')) closePalette();
+    });
+
+    function openPalette() {
+        cmdOverlay.classList.remove('cmd-hidden');
+        document.getElementById('mobile-cmd-trigger').style.opacity = '0'; 
+        cmdInput.value = ''; cmdInput.focus(); filterCommands();
+    }
+    function closePalette() {
+        cmdOverlay.classList.add('cmd-hidden');
+        document.getElementById('mobile-cmd-trigger').style.opacity = '1'; cmdInput.blur();
+    }
+
+    cmdInput.addEventListener('input', filterCommands);
+
+    function filterCommands() {
+        const query = cmdInput.value.toLowerCase();
+        filteredCommands = commands.filter(cmd => cmd.name.toLowerCase().includes(query) || cmd.keywords.some(kw => kw.includes(query)));
+        selectedIndex = 0; renderList();
+    }
+
+    function renderList() {
+        cmdList.innerHTML = '';
+        if (filteredCommands.length === 0) { cmdList.innerHTML = '<li class="cmd-item" style="color: #ef4444;">No modules found.</li>'; return; }
+        filteredCommands.forEach((cmd, index) => {
+            const li = document.createElement('li');
+            li.className = `cmd-item ${index === selectedIndex ? 'selected' : ''}`;
+            li.innerHTML = `<span>${cmd.name}</span> <span style="font-size:0.8rem; opacity:0.5">cd ~/${cmd.id}</span>`;
+            li.addEventListener('click', () => { closePalette(); window.location.href = cmd.file; });
+            cmdList.appendChild(li);
+        });
+    }
+
+    cmdInput.addEventListener('keydown', (e) => {
+        if (filteredCommands.length === 0) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = (selectedIndex + 1) % filteredCommands.length; renderList(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = (selectedIndex - 1 + filteredCommands.length) % filteredCommands.length; renderList(); }
+        else if (e.key === 'Enter') { e.preventDefault(); closePalette(); window.location.href = filteredCommands[selectedIndex].file; }
+    });
+    async function loadNoteList() {
+    const response = await fetch('./notes/manifest.json');
+    const notes = await response.json();
+    const listContainer = document.getElementById('knowledge-repo-list'); // Your purple window list
+
+    notes.forEach(note => {
+        const link = document.createElement('a');
+        link.innerText = `> ${note.title}`;
+        link.href = "#";
+        link.className = "terminal-link";
+        link.onclick = (e) => {
+            e.preventDefault();
+            displayNote(note.filename);
+        };
+        listContainer.appendChild(link);
+    });
+}
+
+async function displayNote(filename) {
+    const response = await fetch(`./notes/${filename}`);
+    const html = await response.text();
+    document.getElementById('note-display-area').innerHTML = html;
+}
+
+// Initialize when the page loads
+loadNoteList();
+</script>
+
+</body>
+</html>

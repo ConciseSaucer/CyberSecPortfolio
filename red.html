@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noah Peters | Offensive Operations</title>
+    <style>
+        :root {
+            --bg-dark: #080000;
+            --panel-bg: rgba(40, 5, 5, 0.4);
+            --glass-border: rgba(244, 63, 94, 0.3);
+            --glass-highlight: rgba(244, 63, 94, 0.6);
+            --text-main: #ffe4e6;
+            --text-dim: #fb7185;
+            --accent-main: #f43f5e; /* Crimson */
+            --accent-alert: #ffaa00;
+            --font-mono: 'Fira Code', 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; }
+        
+        html { background-color: var(--bg-dark); }
+
+        body {
+            margin: 0;
+            background: transparent !important;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            overflow-x: hidden;
+        }
+
+        /* --- ANIMATED BACKGROUND CANVAS --- */
+        #matrix-canvas {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            z-index: -1;
+            pointer-events: none;
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        /* --- OS VIRTUAL WORKSPACE --- */
+        #os-workspace {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+            overflow-x: hidden; overflow-y: auto;
+            background: transparent !important;
+        }
+
+        .slide-out-left { transform: translateX(-100vw); opacity: 0; }
+        .slide-out-right { transform: translateX(100vw); opacity: 0; }
+
+        /* --- DASHBOARD GRID --- */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px; width: 100%; max-width: 1400px;
+            margin: 80px auto 40px auto; padding: 0 2rem; 
+            background: transparent !important;
+        }
+
+        .glass-panel {
+            background: var(--panel-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-highlight);
+            border-radius: 16px; padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(244, 63, 94, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9), inset 0 0 25px rgba(244, 63, 94, 0.15);
+            border-color: var(--glass-highlight);
+        }
+
+        .panel-header {
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--text-dim); border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .status-dot { width: 8px; height: 8px; background-color: var(--accent-main); border-radius: 50%; box-shadow: 0 0 10px var(--accent-main); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; box-shadow: 0 0 5px var(--accent-main); } 50% { opacity: 1; box-shadow: 0 0 15px var(--accent-main); } }
+
+        /* Grid Spans */
+        .span-12 { grid-column: span 12; }
+        .span-6 { grid-column: span 6; }
+        @media (max-width: 1024px) { .span-6 { grid-column: span 12; } }
+
+        /* --- ANALYST MODE TOGGLE --- */
+        #mode-toggle-container {
+            position: fixed; top: 20px; right: 30px; z-index: 1000;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(20, 5, 5, 0.8); padding: 8px 15px; border-radius: 30px;
+            border: 1px solid var(--glass-border); backdrop-filter: blur(8px);
+        }
+        .toggle-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: var(--text-dim); transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-alert); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: #fff; box-shadow: 0 0 10px #fff; }
+
+        /* ANALYST MODE CSS RULES */
+        .analyst-view { display: none; }
+        .tech-view { display: block; }
+        body.analyst-mode .tech-view { display: none; }
+        body.analyst-mode .analyst-view { display: block; }
+
+        /* Custom Interactive Tabs */
+        .tab-container { display: flex; gap: 20px; min-height: 250px; }
+        .tab-buttons { display: flex; flex-direction: column; gap: 10px; min-width: 200px; }
+        .tab-btn { 
+            background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: var(--text-dim); 
+            padding: 12px 15px; border-radius: 6px; cursor: pointer; text-align: left; font-family: var(--font-mono); 
+            transition: all 0.2s; 
+        }
+        .tab-btn:hover { background: rgba(244, 63, 94, 0.1); }
+        .tab-btn.active { background: rgba(244, 63, 94, 0.2); border-color: var(--accent-main); color: #fff; box-shadow: 0 0 15px rgba(244, 63, 94, 0.2); }
+        .tab-content-area { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 25px; }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+        .tab-panel h3 { margin-top: 0; color: var(--accent-main); font-size: 1.1rem; }
+        .tab-panel p { line-height: 1.6; font-size: 0.95rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .tab-container { flex-direction: column; }
+            .tab-buttons { flex-direction: row; flex-wrap: wrap; }
+            .tab-btn { flex: 1; text-align: center; }
+        }
+
+        /* Tool Sandbox Elements */
+        .sandbox-area { background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); border-radius: 8px; padding: 20px; font-size: 0.9rem; }
+        .payload-input { width: 100%; background: #000; border: 1px solid var(--glass-border); color: #fff; padding: 12px; font-family: var(--font-mono); border-radius: 4px; margin-bottom: 10px; outline: none; cursor: pointer; transition: 0.2s; }
+        .payload-input:hover { border-color: var(--accent-main); }
+        .payload-input:focus { border-color: var(--accent-main); box-shadow: 0 0 10px rgba(244, 63, 94, 0.2); }
+        .sys-log { margin-top: 10px; padding: 15px; background: #000; border-left: 3px solid var(--text-dim); min-height: 60px; font-size: 0.8rem; color: #a1a1aa; line-height: 1.5; }
+
+        /* Buffer Overflow Visualizer */
+        .memory-block { display: flex; height: 40px; margin: 15px 0; border: 1px solid #333; border-radius: 4px; overflow: hidden; background: #111; }
+        .mem-segment { display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; transition: all 0.3s; }
+        .mem-buffer { width: 64%; background: rgba(34, 211, 238, 0.2); border-right: 2px dashed #555; }
+        .mem-eip { width: 36%; background: rgba(168, 85, 247, 0.2); }
+
+        /* Command Palette Styles */
+        #cmd-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 10000; display: flex; justify-content: center; align-items: flex-start; padding-top: 15vh; opacity: 1; transition: opacity 0.2s ease; }
+        #cmd-overlay.cmd-hidden { opacity: 0; pointer-events: none; }
+        #cmd-palette { width: 100%; max-width: 600px; background: rgba(20, 5, 5, 0.9); border: 1px solid rgba(244, 63, 94, 0.4); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 20px rgba(244, 63, 94, 0.1); transform: translateY(0); transition: transform 0.2s; }
+        #cmd-overlay.cmd-hidden #cmd-palette { transform: translateY(-20px); }
+        .cmd-header { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 1.1rem; }
+        #cmd-input { background: transparent; border: none; color: #fff; font-family: 'Fira Code', monospace; font-size: 1.1rem; width: 100%; margin-left: 10px; outline: none; }
+        #cmd-list { list-style: none; margin: 0; padding: 10px; max-height: 300px; overflow-y: auto; }
+        .cmd-item { padding: 12px 15px; color: #a1a1aa; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
+        .cmd-item.selected, .cmd-item:hover { background: rgba(244, 63, 94, 0.2); color: #fff; }
+        .cmd-footer { padding: 10px 20px; background: rgba(0, 0, 0, 0.4); border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: flex-end; gap: 15px; font-size: 0.75rem; color: #71717a; }
+        kbd { background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; font-family: inherit; }
+        
+        #mobile-cmd-trigger { position: fixed; bottom: 30px; right: 30px; background: rgba(20, 5, 5, 0.8); backdrop-filter: blur(8px); border: 1px solid rgba(244, 63, 94, 0.3); color: #a1a1aa; padding: 12px 20px; border-radius: 30px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 0.9rem; z-index: 9990; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #mobile-cmd-trigger:hover { background: rgba(244, 63, 94, 0.2); color: #fff; border-color: var(--accent-main); transform: translateY(-2px); }
+        #cmd-overlay:not(.cmd-hidden) ~ #mobile-cmd-trigger { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="mode-toggle-container">
+    <span class="toggle-label" id="mode-text">Standard View</span>
+    <label class="switch">
+        <input type="checkbox" id="analyst-toggle" onchange="toggleAnalystMode()">
+        <span class="slider"></span>
+    </label>
+</div>
+
+<canvas id="matrix-canvas"></canvas>
+
+<div id="os-workspace">
+    <div class="dashboard">
+        
+        <div class="glass-panel span-12" style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; padding: 0; overflow: hidden; background: transparent !important;">
+            <div style="flex: 0 0 auto; display: flex; align-items: center; padding: 30px 40px; color: var(--accent-main); font-size: 1rem; text-shadow: 0 0 10px var(--accent-main); line-height: 1.1; max-width: 100%; overflow-x: auto;">
+<pre style="margin: 0; font-family: var(--font-mono); font-weight: bold;">
+                                ,-.
+                               ("O_)
+                              / `-/
+                             /-. /
+                            /   )
+                           /   /  
+              _           /-. /
+             (_)"-._     /   )
+               "-._ "-'""( )/    
+                   "-/"-._" `. 
+                    /     "-.'._
+                   /\       /-._"-._
+    _,---...__    /  ) _,-"/    "-(_)
+___<__(|) _   ""-/  / /   /
+ '  `----' ""-.   \/ /   /
+               )  ] /   /
+       ____..-'   //   /                       )
+   ,-""      __.,'/   /   ___                 /,
+  /    ,--""/  / /   /,-""   """-.          ,'/
+ [    (    /  / /   /  ,.---,_   `._   _,-','
+  \    `-./  / /   /  /       `-._  """ ,-'
+   `-._  /  / /   /_,'            ""--"
+       "/  / /   /"         
+       /  / /   /
+      /  / /   /  o!O
+     /  |,'   /  
+    :   /    /
+    [  /   ,'   "Blackadder"
+    | /  ,'
+    |/,-'
+    P'
+</pre>
+            </div>
+            <div style="flex: 1; min-width: 300px; padding: 30px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="panel-header" style="border-bottom: none; padding-bottom: 0; margin-bottom: 10px;">
+                    <span class="tech-view" style="font-size: 1.2rem; color: #fff;">Offensive Operations: Threat Emulation</span>
+                    <span class="analyst-view" style="font-size: 1.2rem; color: #fff;">Offensive Security: Testing the Armor</span>
+                </div>
+                <p class="tech-view" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin: 0;">
+                    Welcome to the Offensive Operations lab. This workspace details advanced persistent threat (APT) emulation, vulnerability research, and exploit development. By replicating real-world attack vectors across the cyber kill chain, we generate the actionable intelligence required to architect resilient defense-in-depth strategies.
+                </p>
+                <p class="analyst-view" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin: 0;">
+                    Welcome to Analyst Mode. A shield is only as strong as the sword that strikes it. This workspace breaks down the "art of the strike" into plain English. By studying exactly how a saboteur finds weaknesses, bypasses guards, and steals the prize, we learn how to build better locks and stronger walls for the defensive dashboard.
+                </p>
+                <div style="margin-top: 15px; font-size: 0.8rem; color: var(--accent-main);">
+                    > WARNING: The custom modules detailed below are for authorized auditing and educational purposes only.
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel span-12">
+            <div class="panel-header">
+                <span class="tech-view">Deconstructed Breach // MITRE ATT&CK Mapping</span>
+                <span class="analyst-view">Anatomy of a Strike // The Saboteur's Playbook</span>
+                <div class="status-dot"></div>
+            </div>
+
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab(1)">1. Reconnaissance</button>
+                    <button class="tab-btn" onclick="switchTab(2)">2. Initial Access</button>
+                    <button class="tab-btn" onclick="switchTab(3)">3. Privilege Escalation</button>
+                    <button class="tab-btn" onclick="switchTab(4)">4. Exfiltration</button>
+                </div>
+
+                <div class="tab-content-area">
+                    <div id="tab-1" class="tab-panel active">
+                        <h3 class="tech-view">Phase 1: Reconnaissance & Resource Development</h3>
+                        <h3 class="analyst-view">Phase 1: The Scout (Mapping the Armor)</h3>
+                        <p class="tech-view">
+                            <strong>Objective:</strong> Gather intelligence on the target's attack surface.<br><br>
+                            Before an exploit is launched, an adversary maps the infrastructure. This involves active network scanning (Nmap) to identify open ports, service fingerprinting to find outdated software versions, and OSINT gathering to locate exposed employee credentials. Custom payload development is tailored directly to the specific architecture discovered during this phase.
+                        </p>
+                        <p class="analyst-view">
+                            <strong>Objective:</strong> Find the weakest point in the castle wall.<br><br>
+                            Before the sword is ever drawn, the attacker is the scout standing at the edge of the forest. They are using telescopes to count the guards, watching the shift rotations, and looking for the one cellar door that isn't fully bolted. They don't attack yet; they gather enough information to ensure the attack cannot fail when it begins.
+                        </p>
+                    </div>
+
+                    <div id="tab-2" class="tab-panel">
+                        <h3 class="tech-view">Phase 2: Initial Access & Execution</h3>
+                        <h3 class="analyst-view">Phase 2: The First Cut (Infiltration)</h3>
+                        <p class="tech-view">
+                            <strong>Objective:</strong> Establish a foothold within the perimeter.<br><br>
+                            The perimeter is breached. This could occur via spearphishing attachments executing malicious macros, or by exploiting a vulnerable public-facing web server (e.g., SQL Injection or Remote Code Execution). Once the payload executes, the attacker secures a reverse shell, opening a command-and-control (C2) channel back to their infrastructure.
+                        </p>
+                        <p class="analyst-view">
+                            <strong>Objective:</strong> Get past the front gate.<br><br>
+                            This is the moment the blade finds a gap in the chainmail. It’s a forged letter tricking a guard into opening the gate, or a saboteur slipping through the unbarred window found during reconnaissance. The attacker is now inside the walls, operating in the shadows, waiting for the right moment to move deeper.
+                        </p>
+                    </div>
+
+                    <div id="tab-3" class="tab-panel">
+                        <h3 class="tech-view">Phase 3: Privilege Escalation & Lateral Movement</h3>
+                        <h3 class="analyst-view">Phase 3: The Inner Sanctum (Gaining Power)</h3>
+                        <p class="tech-view">
+                            <strong>Objective:</strong> Acquire administrative controls and pivot through the network.<br><br>
+                            Initial shells are often unprivileged (e.g., `www-data`). The attacker scans the local host for misconfigurations, SUID binaries, or kernel vulnerabilities to escalate to `root` or `SYSTEM`. Once compromised, they dump credentials from memory (like LSASS) and use those hashes to move laterally to other servers, eventually targeting the Domain Controller.
+                        </p>
+                        <p class="analyst-view">
+                            <strong>Objective:</strong> Steal the master keys.<br><br>
+                            The saboteur entered as a peasant, but to reach the treasure, they need authority. They pick the pocket of a sleeping captain to steal his uniform and master key ring. Now, instead of sneaking, they can walk freely down any hallway, opening every locked door in the castle without raising an alarm.
+                        </p>
+                    </div>
+
+                    <div id="tab-4" class="tab-panel">
+                        <h3 class="tech-view">Phase 4: Collection & Exfiltration</h3>
+                        <h3 class="analyst-view">Phase 4: The Escape (Taking the Prize)</h3>
+                        <p class="tech-view">
+                            <strong>Objective:</strong> Package and extract sensitive data without detection.<br><br>
+                            The objective is reached. Sensitive databases, intellectual property, or cryptographic keys are aggregated and compressed. To avoid triggering Data Loss Prevention (DLP) systems on the firewall, the data is often encrypted and smuggled out via covert channels, such as DNS tunneling or embedded within normal HTTPS traffic.
+                        </p>
+                        <p class="analyst-view">
+                            <strong>Objective:</strong> Slip away with the gold.<br><br>
+                            The sword is sheathed. The saboteur has found the vault, but they can't just walk out the front door carrying heavy bags of gold. They hide the treasure inside laundry carts or secret compartments in merchant wagons, slipping out quietly into the night before the castle even realizes they were robbed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel span-6">
+            <div class="panel-header">
+                <span class="tech-view">Asynchronous Reconnaissance // Port Scanner</span>
+                <span class="analyst-view">The Armory // The Doorknob Rattler</span>
+                <div class="status-dot"></div>
+            </div>
+            
+            <div class="tech-view" style="font-size: 0.85rem; margin-bottom: 15px;">
+                Utilizes asynchronous connection logic to audit network state. Incorporates specific error handling to differentiate between a <b>Filtered</b> port (Dropped Packet/Timeout) and a <b>Closed</b> port (RST Packet received).
+            </div>
+            <div class="analyst-view" style="font-size: 0.85rem; margin-bottom: 15px;">
+                A custom "Doorknob Rattler" built to check thousands of digital doors rapidly. It listens carefully: a hard "No" means the door is locked (Closed). Total silence means a guard caught its hand (Firewall Detected).
+            </div>
+
+            <div class="sandbox-area">
+                <select id="scan-target-ip" class="payload-input" onchange="runPortScan()">
+                    <option value="" disabled selected>Select Network Target...</option>
+                    <option value="10.0.0.5">10.0.0.5 (Internal Domain Controller)</option>
+                    <option value="192.168.1.100">192.168.1.100 (Public Web Server)</option>
+                    <option value="172.16.0.50">172.16.0.50 (Backend Database)</option>
+                </select>
+                
+                <div class="sys-log" id="scanner-output" style="height: 180px; overflow-y: auto; border-color: var(--accent-main);">
+                    > Awaiting target selection...
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel span-6">
+            <div class="panel-header">
+                <span class="tech-view">Exploit Sandbox // Buffer Overflow</span>
+                <span class="analyst-view">Exploit Sandbox // The Overfilled Cup</span>
+            </div>
+
+            <p class="tech-view" style="font-size: 0.85rem; margin-top:0;">
+                A Buffer Overflow occurs when a program writes more data to a block of memory than it was allocated to hold. By deliberately over-allocating bytes, an attacker can overwrite the adjacent Instruction Pointer (EIP), hijacking the application's execution flow.
+            </p>
+            <p class="analyst-view" style="font-size: 0.85rem; margin-top:0;">
+                Imagine a machine with a small cup designed to hold exactly 64 drops of water. Next to it is the machine's control circuitry. If we pour 100 drops, the cup overflows, water spills onto the circuitry, and we can short-circuit the machine to force the door open.
+            </p>
+
+            <div class="sandbox-area">
+                <div style="font-size: 0.8rem; color: var(--accent-alert); margin-bottom: 5px;">[TARGET]: Memory Allocation = 64 Bytes</div>
+                
+                <div class="memory-block">
+                    <div class="mem-segment mem-buffer" id="mem-buf">BUFFER [64 Bytes]</div>
+                    <div class="mem-segment mem-eip" id="mem-eip">EIP (Return Addr)</div>
+                </div>
+
+                <select id="payload-size" class="payload-input" onchange="executeExploit()">
+                    <option value="" disabled selected>Select Payload Size...</option>
+                    <option value="32">32 Bytes (Standard User Input)</option>
+                    <option value="64">64 Bytes (Boundary Limit)</option>
+                    <option value="80">80 Bytes (Partial EIP Overwrite)</option>
+                    <option value="128">128 Bytes (Full Memory Corruption)</option>
+                </select>
+
+                <div class="sys-log" id="sandbox-log" style="height: 110px; overflow-y: auto;">
+                    > Awaiting payload selection...
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<button id="mobile-cmd-trigger" onclick="openPalette()" title="Open Command Palette">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <span>cmd</span>
+</button>
+
+<div id="cmd-overlay" class="cmd-hidden">
+    <div id="cmd-palette">
+        <div class="cmd-header"><span style="color: var(--accent-main);">> root@cyacad:</span><input type="text" id="cmd-input" placeholder="Type a destination or command..." autocomplete="off" spellcheck="false"></div>
+        <ul id="cmd-list"></ul>
+        <div class="cmd-footer"><span><kbd>↑</kbd> <kbd>↓</kbd> navigate</span><span><kbd>Enter</kbd> execute</span><span><kbd>ESC</kbd> cancel</span></div>
+    </div>
+</div>
+
+<script>
+    // --- ANALYST MODE LOGIC ---
+    function toggleAnalystMode() {
+        const isChecked = document.getElementById('analyst-toggle').checked;
+        const body = document.body;
+        const textLabel = document.getElementById('mode-text');
+        
+        if(isChecked) {
+            body.classList.add('analyst-mode');
+            textLabel.innerText = "Analyst View";
+            textLabel.style.color = "var(--accent-alert)";
+        } else {
+            body.classList.remove('analyst-mode');
+            textLabel.innerText = "Standard View";
+            textLabel.style.color = "var(--text-dim)";
+        }
+    }
+
+    // --- TAB SWITCHING LOGIC ---
+    function switchTab(tabIndex) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+        document.querySelectorAll('.tab-btn')[tabIndex - 1].classList.add('active');
+        document.getElementById(`tab-${tabIndex}`).classList.add('active');
+    }
+
+    // --- INTERACTIVE PORT SCANNER LOGIC ---
+    async function runPortScan() {
+        const ip = document.getElementById('scan-target-ip').value;
+        const output = document.getElementById('scanner-output');
+        const isAnalyst = document.body.classList.contains('analyst-mode');
+        
+        if (!ip) return;
+
+        output.innerHTML = `> Initializing scan on ${ip}...<br>`;
+        
+        // Define unique port behaviors based on target selected
+        const targetSpecs = {
+            '10.0.0.5': { open: [53, 88, 135, 139, 445, 3389], filtered: [22, 80, 443] },
+            '192.168.1.100': { open: [22, 80, 443], filtered: [3306, 3389] },
+            '172.16.0.50': { open: [1433, 3306], filtered: [22, 80, 443, 445] }
+        };
+
+        const spec = targetSpecs[ip];
+        const allPorts = [21, 22, 25, 53, 80, 88, 135, 139, 443, 445, 1433, 3306, 3389];
+        
+        // Simulate scanning loop
+        for (let i = 0; i < allPorts.length; i++) {
+            const port = allPorts[i];
+            
+            // Artificial delay to simulate network latency
+            await new Promise(resolve => setTimeout(resolve, 150));
+
+            // Output logic based on target specifications
+            if (spec.open.includes(port)) {
+                output.innerHTML += `<span style="color: #4ade80;">[+] PORT ${port.toString().padEnd(4)} : OPEN</span><br>`;
+            } else if (spec.filtered.includes(port)) {
+                if (isAnalyst) {
+                    output.innerHTML += `<span style="color: var(--accent-alert);">[?] PORT ${port.toString().padEnd(4)} : GUARD DETECTED (Firewall)</span><br>`;
+                } else {
+                    output.innerHTML += `<span style="color: var(--accent-alert);">[!] PORT ${port.toString().padEnd(4)} : FILTERED (Timeout)</span><br>`;
+                }
+            } else {
+                output.innerHTML += `<span style="color: #555;">[-] PORT ${port.toString().padEnd(4)} : CLOSED</span><br>`;
+            }
+            
+            // Auto-scroll the log
+            output.scrollTop = output.scrollHeight;
+        }
+        output.innerHTML += "> Scan complete. Target mapped.";
+    }
+
+    // --- BUFFER OVERFLOW SANDBOX LOGIC ---
+    function executeExploit() {
+        const size = parseInt(document.getElementById('payload-size').value);
+        const bufBlock = document.getElementById('mem-buf');
+        const eipBlock = document.getElementById('mem-eip');
+        const log = document.getElementById('sandbox-log');
+        const isAnalyst = document.body.classList.contains('analyst-mode');
+
+        if(isNaN(size)) return;
+
+        log.innerHTML = `> Injecting payload of ${size} bytes...<br>`;
+
+        if (log.innerHTML.includes('Awaiting payload')) {
+            log.innerHTML = `> Injecting payload of ${size} bytes...<br>`;
+        } else {
+            log.innerHTML += `<br><span style="color: #555;">--- NEW INJECTION ---</span><br>> Injecting payload of ${size} bytes...<br>`;
+        }
+        if (size <= 64) {
+            // Safe
+            bufBlock.style.background = 'rgba(34, 211, 238, 0.5)';
+            eipBlock.style.background = 'rgba(168, 85, 247, 0.2)'; // untouched
+            bufBlock.innerText = `Data [${size} Bytes]`;
+            eipBlock.innerText = "EIP Intact";
+            
+            setTimeout(() => {
+                if(isAnalyst) log.innerHTML += "<span style='color:#4ade80;'>> The cup holds the water. System operates normally.</span>";
+                else log.innerHTML += "<span style='color:#4ade80;'>> STATUS 0: Execution normal. Instruction pointer preserved.</span>";
+                log.scrollTop = log.scrollHeight;
+            }, 500);
+        } else {
+            // Overflow!
+            bufBlock.style.background = 'var(--accent-main)';
+            eipBlock.style.background = 'var(--accent-main)';
+            bufBlock.innerText = `OVERFLOW [64]`;
+            eipBlock.innerText = `OVERFLOW [${size - 64}]`;
+
+            setTimeout(() => {
+                if(isAnalyst) log.innerHTML += "<span style='color:var(--accent-main); font-weight:bold;'>> OVERFLOW: The cup spills onto the circuitry! The lock mechanism is short-circuited.</span>";
+                else log.innerHTML += "<span style='color:var(--accent-main); font-weight:bold;'>> SIGSEGV: Return address (EIP) overwritten. Code execution achieved.</span>";
+                log.scrollTop = log.scrollHeight;
+            }, 500);
+        }
+    }
+
+    // --- CANVAS MATRIX ANIMATION ---
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let columns, drops = [];
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%^&*'.split('');
+    const fontSize = 14;
+    
+    let lastWidth = 0;
+    let lastHeight = 0;
+
+    function initMatrix(force = false) {
+        if (!force && Math.abs(window.innerWidth - lastWidth) < 50 && Math.abs(window.innerHeight - lastHeight) < 50) return; 
+        
+        lastWidth = window.innerWidth;
+        lastHeight = window.innerHeight;
+        canvas.width = lastWidth;
+        canvas.height = lastHeight;
+        
+        columns = Math.floor(canvas.width / fontSize) + 1;
+        drops = [];
+        
+        for (let x = 0; x < columns; x++) {
+            drops[x] = Math.random() * (canvas.height / fontSize);
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < 50; i++) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f43f5e';
+            ctx.font = fontSize + 'px "Fira Code", monospace';
+            for (let x = 0; x < drops.length; x++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, x * fontSize, drops[x] * fontSize);
+                if (drops[x] * fontSize > canvas.height && Math.random() > 0.975) drops[x] = 0;
+                drops[x]++;
+            }
+        }
+    }
+    
+    initMatrix(true);
+    window.addEventListener('resize', () => initMatrix(false));
+
+    let lastDrawTime = 0;
+    function drawMatrix(timestamp) {
+        requestAnimationFrame(drawMatrix);
+        if (timestamp - lastDrawTime < 40) return;
+        lastDrawTime = timestamp;
+
+        ctx.fillStyle = 'rgba(8, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#f43f5e';
+        ctx.font = fontSize + 'px "Fira Code", monospace';
+        
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    requestAnimationFrame(drawMatrix);
+
+    // --- COMMAND PALETTE LOGIC ---
+    const cmdOverlay = document.getElementById('cmd-overlay');
+    const cmdInput = document.getElementById('cmd-input');
+    const cmdList = document.getElementById('cmd-list');
+
+    const commands = [
+        { name: "Blue // Defensive Operations", id: "blue", file: "blue.html", keywords: ["blue", "defend", "defense", "soc", "monitor"] },
+        { name: "Purple // Analyst Profile", id: "purple", file: "index.html", keywords: ["purple", "about", "profile", "certs", "home"] },
+        { name: "Red // Offensive Operations", id: "red", file: "red.html", keywords: ["red", "offense", "attack", "exploit", "tools"] }
+    ];
+
+    let selectedIndex = 0; let filteredCommands = [...commands];
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== cmdInput) { e.preventDefault(); openPalette(); }
+        if (e.key === 'Escape' && !cmdOverlay.classList.contains('cmd-hidden')) closePalette();
+    });
+
+    function openPalette() { cmdOverlay.classList.remove('cmd-hidden'); document.getElementById('mobile-cmd-trigger').style.opacity = '0'; cmdInput.value = ''; cmdInput.focus(); filterCommands(); }
+    function closePalette() { cmdOverlay.classList.add('cmd-hidden'); document.getElementById('mobile-cmd-trigger').style.opacity = '1'; cmdInput.blur(); }
+    cmdInput.addEventListener('input', filterCommands);
+
+    function filterCommands() {
+        const query = cmdInput.value.toLowerCase();
+        filteredCommands = commands.filter(cmd => cmd.name.toLowerCase().includes(query) || cmd.keywords.some(kw => kw.includes(query)));
+        selectedIndex = 0; renderList();
+    }
+
+    function renderList() {
+        cmdList.innerHTML = '';
+        if (filteredCommands.length === 0) { cmdList.innerHTML = '<li class="cmd-item" style="color: #ef4444;">No modules found.</li>'; return; }
+        filteredCommands.forEach((cmd, index) => {
+            const li = document.createElement('li');
+            li.className = `cmd-item ${index === selectedIndex ? 'selected' : ''}`;
+            li.innerHTML = `<span>${cmd.name}</span> <span style="font-size:0.8rem; opacity:0.5">cd ~/${cmd.id}</span>`;
+            li.addEventListener('click', () => { closePalette(); window.location.href = cmd.file; });
+            cmdList.appendChild(li);
+        });
+    }
+
+    cmdInput.addEventListener('keydown', (e) => {
+        if (filteredCommands.length === 0) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = (selectedIndex + 1) % filteredCommands.length; renderList(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = (selectedIndex - 1 + filteredCommands.length) % filteredCommands.length; renderList(); }
+        else if (e.key === 'Enter') { e.preventDefault(); closePalette(); window.location.href = filteredCommands[selectedIndex].file; }
+    });
+</script>
+
+</body>
+</html>
