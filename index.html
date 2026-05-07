@@ -592,14 +592,104 @@ _-_-|______|-----------|_____||     ||_____|-----------|______|-_-_
     });
 }
 
-async function displayNote(filename) {
-    const response = await fetch(`./notes/${filename}`);
-    const html = await response.text();
-    document.getElementById('note-display-area').innerHTML = html;
+    async function displayNote(filename) {
+        const response = await fetch(`./notes/${filename}`);
+        const html = await response.text();
+        document.getElementById('note-display-area').innerHTML = html;
+    }
+
+    // Initialize when the page loads
+    loadNoteList();
+
+    // ==========================================
+// KNOWLEDGE REPO / NOTES VAULT LOGIC
+// ==========================================
+
+const NOTES_PATH = './content/notes'; // Must match where your GitHub Action drops the files
+const listContainer = document.getElementById('knowledge-repo-list');
+const displayArea = document.getElementById('note-display-area');
+
+async function initKnowledgeRepo() {
+    listContainer.innerHTML = '<span style="color: var(--accent-pink);">[ Initializing Vault Connection... ]</span>';
+    
+    try {
+        // 1. Fetch the manifest
+        const response = await fetch(`${NOTES_PATH}/manifest.json`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const notes = await response.json();
+        listContainer.innerHTML = ''; // Clear loading text
+
+        if (notes.length === 0) {
+            listContainer.innerHTML = '<span style="color: var(--text-dim);">[ 0 records found in vault ]</span>';
+            return;
+        }
+
+        // 2. Populate the sidebar list
+        notes.forEach(note => {
+            const link = document.createElement('a');
+            link.href = "#";
+            link.className = "cmd-item"; // Reuse your existing hover CSS
+            link.style.display = "block";
+            link.style.textDecoration = "none";
+            link.style.color = "var(--text-main)";
+            link.style.padding = "5px 10px";
+            link.style.borderLeft = "2px solid transparent";
+            
+            // Format: 2026-05-06 // Title
+            link.innerHTML = `<span style="color: var(--text-dim); font-size: 0.8rem;">${note.date}</span><br>> ${note.title}`;
+            
+            link.onclick = (e) => {
+                e.preventDefault();
+                
+                // Visual highlight of selected note
+                document.querySelectorAll('#knowledge-repo-list a').forEach(a => {
+                    a.style.borderLeft = "2px solid transparent";
+                    a.style.background = "transparent";
+                });
+                link.style.borderLeft = "2px solid var(--accent-pink)";
+                link.style.background = "var(--panel-bg)";
+                
+                loadNoteContent(note.filename);
+            };
+            listContainer.appendChild(link);
+        });
+
+    } catch (error) {
+        listContainer.innerHTML = `<span style="color: #ef4444;">[ SYS_ERR: Failed to mount manifest.json ]</span><br><span style="font-size: 0.8rem; opacity: 0.7;">Ensure GitHub Action has executed successfully.</span>`;
+        console.error("Vault Error:", error);
+    }
 }
 
-// Initialize when the page loads
-loadNoteList();
+async function loadNoteContent(filename) {
+    displayArea.innerHTML = '<span style="color: var(--accent-pink); font-style: italic;">[ Decrypting payload... ]</span>';
+    
+    try {
+        const response = await fetch(`${NOTES_PATH}/${filename}`);
+        if (!response.ok) throw new Error("File not found");
+        
+        const html = await response.text();
+        
+        // Inject with a slight delay for aesthetic effect
+        setTimeout(() => {
+            displayArea.innerHTML = `<div class="note-content" style="animation: fadeIn 0.3s ease-in;">${html}</div>`;
+        }, 150);
+
+    } catch (error) {
+        displayArea.innerHTML = `<span style="color: #ef4444;">[ SYS_ERR: Corrupted sector. File unreadable. ]</span>`;
+    }
+}
+
+// Add a quick fade-in animation for the text
+const style = document.createElement('style');
+style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }`;
+document.head.appendChild(style);
+
+// Boot the repo when the page loads
+initKnowledgeRepo();
 </script>
 
 </body>
