@@ -1,0 +1,106 @@
+<h1>Penetration Testing Report</h1>
+
+<h2>Tools and Environment</h2>
+
+<p><strong>Research:</strong></p>
+
+<ul>
+<li><p>ChatGPT</p></li>
+<li><p>GitHub</p></li>
+</ul>
+
+<p><strong>Operating System:</strong></p>
+
+<ul>
+<li><p>Kali Linux / Parrot OS</p></li>
+<li><p>Raspberry Pi</p></li>
+<li><p>Windows</p></li>
+</ul>
+
+<p><strong>Software:</strong></p>
+
+<ul>
+<li><p>Nmap</p></li>
+<li><p>John the Ripper</p></li>
+</ul>
+
+<p><strong>Exploit:</strong></p>
+
+<ul>
+<li>Python script for ProFTPD 1.3.3c backdoor</li>
+</ul>
+
+<hr />
+
+<h2>Reconnaissance</h2>
+
+<h3>Physical Access</h3>
+
+<p>During the initial assessment, I gained physical access to the machine using a guest account. The machine's configuration permitted free navigation through the file system, with the exception being the <code>/home</code> directory. I checked file permissions and quickly accessed the <code>/etc/shadow</code> file, which contains password hashes.</p>
+
+<p><div class="note-img-wrapper"><img src="./content/notes/assets/images/Access.png" class="terminal-img"></div></p>
+
+<h3>Hash Analysis</h3>
+
+<p>Upon obtaining the hash, I consulted ChatGPT to identify the hashing algorithm. The hash was determined to be a SHA512 hash, denoted by the <code>$6$</code> prefix. Using John the Ripper on Kali Linux, I initiated a password cracking attempt.</p>
+
+<h3>Network Scanning</h3>
+
+<p>While the password cracking attempt was running, I proceeded to perform network reconnaissance using Nmap on a Raspberry Pi. The VM was on a bridged adapter, and the Raspberry Pi allowed for discreet network analysis <code>(It was cool)</code>.</p>
+
+<ol>
+<li><p><strong>Network Sweep:</strong> Conducted a network sweep to identify live hosts and detect the vulnerable machine by matching its MAC address to VirtualBox.</p></li>
+<li><p><strong>Version Detection:</strong> Performed a detailed service version scan on the identified machine, revealing an <strong>outdated</strong> FTP service (ProFTPD 1.3.3c).</p></li>
+</ol>
+
+<p><div class="note-img-wrapper"><img src="./content/notes/assets/images/nmap.png" class="terminal-img"></div></p>
+
+<hr />
+
+<h2>Exploitation</h2>
+
+<h3>Attempted Exploits</h3>
+
+<p>Initially, I attempted to exploit the ProFTPD vulnerability using the Metasploit framework but was unsuccessful in establishing a session.</p>
+
+<h3>Successful Exploit</h3>
+
+<p>I then used a Python script specifically designed to exploit the backdoor in ProFTPD 1.3.3c. After providing the appropriate IP addresses for the local and target machines, <strong>the script successfully spawned a root shell</strong>.</p>
+
+<p><div class="note-img-wrapper"><img src="./content/notes/assets/images/exploit.png" class="terminal-img"></div></p>
+
+<hr />
+
+<h2>Post-Exploitation</h2>
+
+<p>Following the successful exploitation, I ended the password cracking attempt due to the complexity(length) of the password. However, I conducted a manual password guessing attack on the <code>marlinspike</code> user account. After a few attempts, I successfully logged in with <code>marlinspike</code> as the password.</p>
+
+<p>Using the acquired credentials, I established an SSH connection and escalated privileges using <code>sudo su</code>, gaining a <strong>remote root shell</strong>.</p>
+
+<p><div class="note-img-wrapper"><img src="./content/notes/assets/images/marlin.png" class="terminal-img"></div></p>
+
+<hr />
+
+<h2>Recommendations for Prevention</h2>
+
+<p>To mitigate similar attacks in the future, I recommend implementing the following security measures:</p>
+
+<ol>
+<li><p><strong>File Permission Management:</strong></p>
+
+<ul>
+<li>Restrict read access to sensitive files like <code>/etc/shadow</code>.</li>
+</ul></li>
+<li><p><strong>Software Updates:</strong></p>
+
+<ul>
+<li>Regularly update and patch services, particularly externally accessible ones.</li>
+</ul></li>
+<li><p><strong>Strong Passwords:</strong></p>
+
+<ul>
+<li>Enforce the use of complex passwords and implement account lockout policies.</li>
+</ul></li>
+</ol>
+
+<p>These measures would significantly reduce the risk of unauthorized access and system compromise.</p>
