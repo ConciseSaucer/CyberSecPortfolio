@@ -170,6 +170,15 @@
         #mobile-cmd-trigger { position: fixed; bottom: 30px; right: 30px; background: rgba(15, 5, 25, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(168, 85, 247, 0.3); color: #a1a1aa; padding: 12px 20px; border-radius: 30px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 0.9rem; z-index: 9990; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         #mobile-cmd-trigger:hover { background: rgba(168, 85, 247, 0.2); color: #fff; border-color: rgba(168, 85, 247, 0.8); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(168, 85, 247, 0.2); }
         #cmd-overlay:not(.cmd-hidden) ~ #mobile-cmd-trigger { opacity: 0; pointer-events: none; }
+           /* --- MOBILE LAYOUT HARDENING --- */
+        .glass-panel p, 
+        .glass-panel span, 
+        .note-content p {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            -ms-word-break: break-all;
+            word-break: break-word;
+        }
     </style>
 </head>
 <body>
@@ -190,7 +199,8 @@
             <div class="panel-header">
                 <span>System Profile // Neofetch</span>
             </div>
-            <div class="neofetch-container">
+            <div class="neofetch-container" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
+                <div style="max-width: 100%; overflow-x: auto;">
 <pre class="ascii-art">
 ███╗   ██╗██████╗ 
 ████╗  ██║██╔══██╗
@@ -199,6 +209,7 @@
 ██║ ╚████║██║     
 ╚═╝  ╚═══╝╚═╝     
 </pre>
+                </div>
                 <div class="sys-info">
                     <p><span>USER@HOST</span>: noah@cyacad_portfolio</p>
                     <p><span>ROLE</span>: Systems Admin & Vulnerability Analyst</p>
